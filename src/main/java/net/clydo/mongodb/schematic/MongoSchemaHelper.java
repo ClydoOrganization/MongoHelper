@@ -30,7 +30,6 @@ import net.clydo.mongodb.codec.type.ClassCodecProvider;
 import net.clydo.mongodb.MongoHelper;
 import net.clydo.mongodb.loader.LoaderRegistry;
 import net.clydo.mongodb.loader.classes.values.MongoModelValue;
-import net.clydo.mongodb._sample.UserModel;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.jetbrains.annotations.NotNull;
@@ -88,7 +87,6 @@ public class MongoSchemaHelper {
 
         for (Class<?> clazz : models) {
             val holder = this.registry.buildModel(clazz, schemaHolder);
-            System.out.println(this.registry.getModel(UserModel.class));
             this.createIndexes(holder);
         }
     }
