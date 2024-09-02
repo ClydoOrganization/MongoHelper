@@ -18,16 +18,19 @@
  * Copyright (C) 2024 ClydoNetwork
  */
 
-package net.clydo.mongodb.annotations;
+package net.clydo.mongodb.operations;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import net.clydo.mongodb.loader.classes.values.MongoMutableField;
+import org.jetbrains.annotations.NotNull;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@MongoType
-public @interface MongoModel {
-    String value();
+import java.util.HashMap;
+
+public interface IOperations<M> {
+    @NotNull String firstUniqueFieldName();
+
+    @NotNull HashMap<String, MongoMutableField> fields();
+
+    Object[] getFieldValues(HashMap<String, MongoMutableField> fields, @NotNull M @NotNull [] data, @NotNull String fieldName);
+
+    Object getFieldValue(@NotNull HashMap<String, MongoMutableField> fields, @NotNull M datum, @NotNull String fieldName);
 }

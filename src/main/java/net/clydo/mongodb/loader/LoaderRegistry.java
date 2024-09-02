@@ -16,7 +16,6 @@
  * <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) 2024 ClydoNetwork
- *
  */
 
 package net.clydo.mongodb.loader;
@@ -58,12 +57,14 @@ public class LoaderRegistry {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public <C> MongoModelValue<C> buildModel(Class<C> clazz, MongoSchemaHolder parent) {
         val value = this.classCacheLoader.build(clazz, parent);
         this.cache.put(clazz, value);
         return (MongoModelValue<C>) value;
     }
 
+    @SuppressWarnings("unchecked")
     public <C> MongoTypeValue<C> buildType(Class<C> clazz) {
         val value = this.classCacheLoader.build(clazz, null);
         this.cache.put(clazz, value);

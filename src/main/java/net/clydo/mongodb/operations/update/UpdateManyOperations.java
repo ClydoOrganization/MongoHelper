@@ -18,16 +18,13 @@
  * Copyright (C) 2024 ClydoNetwork
  */
 
-package net.clydo.mongodb.annotations;
+package net.clydo.mongodb.operations.update;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.mongodb.client.result.UpdateResult;
+import net.clydo.mongodb.operations.IOperations;
+import org.bson.conversions.Bson;
+import org.jetbrains.annotations.NotNull;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@MongoType
-public @interface MongoModel {
-    String value();
+public interface UpdateManyOperations<M> extends IOperations<M> {
+    @NotNull UpdateResult many(@NotNull Bson filter, @NotNull Bson update);
 }

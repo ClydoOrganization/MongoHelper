@@ -18,22 +18,26 @@
  * Copyright (C) 2024 ClydoNetwork
  */
 
-package net.clydo.mongodb.loader.enums;
+package net.clydo.mongodb.operations.delete;
 
-import net.clydo.mongodb.annotations.MongoEnum;
-import net.clydo.mongodb.loader.enums.values.MongoEnumValue;
-import net.clydo.mongodb.util.ReflectionUtil;
+import com.mongodb.client.result.DeleteResult;
+import net.clydo.mongodb.loader.classes.values.MongoModelValue;
+import net.clydo.mongodb.operations.AbstractOperation;
+import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
-public class EnumCacheLoader {
-    @SuppressWarnings("unchecked")
-    public <T, E extends Enum<E>> MongoEnumValue<E> buildUnsafe(Class<T> clazz) {
-        return build((Class<E>) clazz);
+public class DeleteOperations<M> extends AbstractOperation<M> implements DeleteOneOperations<M>, DeleteManyOperations<M> {
+    public DeleteOperations(MongoModelValue<M> model) {
+        super(model);
     }
 
-    private <E extends Enum<E>> @NotNull MongoEnumValue<E> build(Class<E> clazz) {
-        ReflectionUtil.validateAnnotation(clazz, MongoEnum.class);
+    @Override
+    public @NotNull DeleteResult one(@NotNull Bson filter) {
+        return this.collection().deleteOne(filter);
+    }
 
-        return MongoEnumValue.of(clazz);
+    @Override
+    public @NotNull DeleteResult many(@NotNull Bson filter) {
+        return this.collection().deleteMany(filter);
     }
 }

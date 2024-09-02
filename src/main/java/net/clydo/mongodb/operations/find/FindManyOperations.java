@@ -18,16 +18,24 @@
  * Copyright (C) 2024 ClydoNetwork
  */
 
-package net.clydo.mongodb.annotations;
+package net.clydo.mongodb.operations.find;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.Filters;
+import net.clydo.mongodb.operations.IOperations;
+import org.bson.BsonDocument;
+import org.bson.conversions.Bson;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@MongoType
-public @interface MongoModel {
-    String value();
+public interface FindManyOperations<M> extends IOperations<M> {
+    @NotNull FindIterable<M> many(@NotNull Bson filter);
+
+    default @NotNull FindIterable<M> many() {
+        return this.many(new BsonDocument());
+    }
+
+    default @NotNull FindIterable<M> many(@NotNull String fieldName, @Nullable Object value) {
+        return this.many(Filters.eq(fieldName, value));
+    }
 }

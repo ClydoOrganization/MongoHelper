@@ -18,16 +18,20 @@
  * Copyright (C) 2024 ClydoNetwork
  */
 
-package net.clydo.mongodb.annotations;
+package net.clydo.mongodb.operations.count;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import net.clydo.mongodb.loader.classes.values.MongoModelValue;
+import net.clydo.mongodb.operations.AbstractOperation;
+import org.bson.conversions.Bson;
+import org.jetbrains.annotations.NotNull;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@MongoType
-public @interface MongoModel {
-    String value();
+public class CountOperations<M> extends AbstractOperation<M> implements ICountOperations<M> {
+    public CountOperations(MongoModelValue<M> model) {
+        super(model);
+    }
+
+    @Override
+    public long raw(@NotNull Bson filter) {
+        return this.collection().countDocuments(filter);
+    }
 }

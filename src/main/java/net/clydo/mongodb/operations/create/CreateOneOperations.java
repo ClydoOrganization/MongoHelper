@@ -18,16 +18,12 @@
  * Copyright (C) 2024 ClydoNetwork
  */
 
-package net.clydo.mongodb.annotations;
+package net.clydo.mongodb.operations.create;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.mongodb.client.result.InsertOneResult;
+import net.clydo.mongodb.operations.IOperations;
+import org.jetbrains.annotations.NotNull;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@MongoType
-public @interface MongoModel {
-    String value();
+public interface CreateOneOperations<M> extends IOperations<M> {
+    @NotNull InsertOneResult one(@NotNull M datum);
 }

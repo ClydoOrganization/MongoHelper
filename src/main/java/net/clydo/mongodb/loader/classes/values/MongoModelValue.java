@@ -16,14 +16,18 @@
  * <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) 2024 ClydoNetwork
- *
  */
 
 package net.clydo.mongodb.loader.classes.values;
 
 import com.mongodb.client.MongoCollection;
 import net.clydo.mongodb.loader.CacheValue;
-import net.clydo.mongodb.operations.Operations;
+import net.clydo.mongodb.operations.count.CountOperations;
+import net.clydo.mongodb.operations.create.CreateOperations;
+import net.clydo.mongodb.operations.delete.DeleteOperations;
+import net.clydo.mongodb.operations.find.FindOperations;
+import net.clydo.mongodb.operations.update.UpdateOperations;
+import net.clydo.mongodb.operations.upsert.UpsertOperations;
 import net.clydo.mongodb.schematic.MongoSchemaHolder;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +44,13 @@ public final class MongoModelValue<M> implements CacheValue, ClassCacheValue {
     private final List<String> uniques;
     private final HashMap<String, MongoMutableField> fields;
     private final MongoSchemaHolder parent;
-    private Operations<M> operations;
+
+    private final CountOperations<M> countOperations;
+    private final CreateOperations<M> createOperations;
+    private final DeleteOperations<M> deleteOperations;
+    private final FindOperations<M> findOperations;
+    private final UpdateOperations<M> updateOperations;
+    private final UpsertOperations<M> upsertOperations;
 
     public MongoModelValue(
             Class<M> type,
@@ -56,6 +66,13 @@ public final class MongoModelValue<M> implements CacheValue, ClassCacheValue {
         this.uniques = uniques;
         this.fields = fields;
         this.parent = parent;
+
+        this.countOperations = new CountOperations<>(this);
+        this.createOperations = new CreateOperations<>(this);
+        this.deleteOperations = new DeleteOperations<>(this);
+        this.findOperations = new FindOperations<>(this);
+        this.updateOperations = new UpdateOperations<>(this);
+        this.upsertOperations = new UpsertOperations<>(this);
     }
 
     @Contract("_, _, _, _ -> new")
@@ -75,12 +92,31 @@ public final class MongoModelValue<M> implements CacheValue, ClassCacheValue {
         );
     }
 
-    public @NotNull Operations<M> operations() {
-        if (this.operations == null) {
-            this.operations = new Operations<>(this);
-        }
-        return this.operations;
+    ///
+    public CountOperations<M> count() {
+        return this.countOperations;
     }
+
+    public CreateOperations<M> create() {
+        return this.createOperations;
+    }
+
+    public DeleteOperations<M> delete() {
+        return this.deleteOperations;
+    }
+
+    public FindOperations<M> find() {
+        return this.findOperations;
+    }
+
+    public UpdateOperations<M> update() {
+        return this.updateOperations;
+    }
+
+    public UpsertOperations<M> upsert() {
+        return this.upsertOperations;
+    }
+    ///
 
     public Class<M> type() {
         return this.type;

@@ -16,10 +16,9 @@
  * <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) 2024 ClydoNetwork
- *
  */
 
-package net.clydo.mongodb.operations.error;
+package net.clydo.mongodb.error;
 
 import lombok.experimental.StandardException;
 

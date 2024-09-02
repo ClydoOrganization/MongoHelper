@@ -16,7 +16,6 @@
  * <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) 2024 ClydoNetwork
- *
  */
 
 package net.clydo.mongodb.annotations;

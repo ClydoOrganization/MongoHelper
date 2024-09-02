@@ -18,22 +18,26 @@
  * Copyright (C) 2024 ClydoNetwork
  */
 
-package net.clydo.mongodb.loader.enums;
+package net.clydo.mongodb.operations.update;
 
-import net.clydo.mongodb.annotations.MongoEnum;
-import net.clydo.mongodb.loader.enums.values.MongoEnumValue;
-import net.clydo.mongodb.util.ReflectionUtil;
+import com.mongodb.client.result.UpdateResult;
+import net.clydo.mongodb.loader.classes.values.MongoModelValue;
+import net.clydo.mongodb.operations.AbstractOperation;
+import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
-public class EnumCacheLoader {
-    @SuppressWarnings("unchecked")
-    public <T, E extends Enum<E>> MongoEnumValue<E> buildUnsafe(Class<T> clazz) {
-        return build((Class<E>) clazz);
+public class UpdateOperations<M> extends AbstractOperation<M> implements UpdateOneOperations<M>, UpdateManyOperations<M> {
+    public UpdateOperations(MongoModelValue<M> model) {
+        super(model);
     }
 
-    private <E extends Enum<E>> @NotNull MongoEnumValue<E> build(Class<E> clazz) {
-        ReflectionUtil.validateAnnotation(clazz, MongoEnum.class);
+    @Override
+    public @NotNull UpdateResult one(@NotNull Bson filter, @NotNull Bson update) {
+        return this.collection().updateOne(filter, update);
+    }
 
-        return MongoEnumValue.of(clazz);
+    @Override
+    public @NotNull UpdateResult many(@NotNull Bson filter, @NotNull Bson update) {
+        return this.collection().updateMany(filter, update);
     }
 }
