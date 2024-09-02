@@ -18,3 +18,5 @@ out/
 !**/src/test/**/out/
 /src/main/java/net/clydo/mongodb/_old/
 /src/main/java/net/clydo/mongodb/_sample/
+logs/
+/src/main/resources/
