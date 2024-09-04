@@ -37,6 +37,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Represents a model in MongoDB with associated operations and metadata.
+ * This class provides operations for interacting with MongoDB collections and managing schemas.
+ *
+ * @param <M> The type of the model.
+ */
 public final class MongoModelValue<M> implements CacheValue, ClassCacheValue {
     private final Class<M> type;
     private final String modelName;
@@ -52,6 +58,16 @@ public final class MongoModelValue<M> implements CacheValue, ClassCacheValue {
     private final UpdateOperations<M> updateOperations;
     private final UpsertOperations<M> upsertOperations;
 
+    /**
+     * Constructs a new {@link MongoModelValue} instance.
+     *
+     * @param type       The class type of the model.
+     * @param modelName  The name of the model.
+     * @param collection The MongoDB collection associated with this model.
+     * @param uniques    The list of unique field names for this model.
+     * @param fields     A map of field names to {@link MongoMutableField} instances.
+     * @param parent     The parent {@link MongoSchemaHolder} for this model.
+     */
     public MongoModelValue(
             Class<M> type,
             String modelName,
@@ -75,6 +91,16 @@ public final class MongoModelValue<M> implements CacheValue, ClassCacheValue {
         this.upsertOperations = new UpsertOperations<>(this);
     }
 
+    /**
+     * Creates a new {@link MongoModelValue} instance with the specified parameters.
+     *
+     * @param type      The class type of the model.
+     * @param fields    A map of field names to {@link MongoMutableField} instances.
+     * @param modelName The name of the model.
+     * @param parent    The parent {@link MongoSchemaHolder} for this model.
+     * @param <M>       The type of the model.
+     * @return A new {@link MongoModelValue} instance.
+     */
     @Contract("_, _, _, _ -> new")
     public static <M> @NotNull MongoModelValue<M> of(
             final Class<M> type,
@@ -86,59 +112,120 @@ public final class MongoModelValue<M> implements CacheValue, ClassCacheValue {
                 type,
                 modelName,
                 parent.database().getCollection(modelName, type),
-                fields.entrySet().stream().filter(entry -> entry.getValue().unique()).map(Map.Entry::getKey).collect(Collectors.toList()),
+                fields.entrySet().stream()
+                        .filter(entry -> entry.getValue().unique())
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList()),
                 fields,
                 parent
         );
     }
 
-    ///
+    /**
+     * Provides access to count operations for this model.
+     *
+     * @return The {@link CountOperations} instance for this model.
+     */
     public CountOperations<M> count() {
         return this.countOperations;
     }
 
+    /**
+     * Provides access to create operations for this model.
+     *
+     * @return The {@link CreateOperations} instance for this model.
+     */
     public CreateOperations<M> create() {
         return this.createOperations;
     }
 
+    /**
+     * Provides access to delete operations for this model.
+     *
+     * @return The {@link DeleteOperations} instance for this model.
+     */
     public DeleteOperations<M> delete() {
         return this.deleteOperations;
     }
 
+    /**
+     * Provides access to find operations for this model.
+     *
+     * @return The {@link FindOperations} instance for this model.
+     */
     public FindOperations<M> find() {
         return this.findOperations;
     }
 
+    /**
+     * Provides access to update operations for this model.
+     *
+     * @return The {@link UpdateOperations} instance for this model.
+     */
     public UpdateOperations<M> update() {
         return this.updateOperations;
     }
 
+    /**
+     * Provides access to upsert operations for this model.
+     *
+     * @return The {@link UpsertOperations} instance for this model.
+     */
     public UpsertOperations<M> upsert() {
         return this.upsertOperations;
     }
-    ///
 
+    /**
+     * Returns the class type of the model.
+     *
+     * @return The class type of the model.
+     */
     public Class<M> type() {
         return this.type;
     }
 
+    /**
+     * Returns the name of the model.
+     *
+     * @return The name of the model.
+     */
     public String modelName() {
         return this.modelName;
     }
 
+    /**
+     * Returns the MongoDB collection associated with this model.
+     *
+     * @return The MongoDB collection for this model.
+     */
     public MongoCollection<M> collection() {
         return this.collection;
     }
 
+    /**
+     * Returns the list of unique field names for this model.
+     *
+     * @return The list of unique field names.
+     */
     public List<String> uniques() {
         return this.uniques;
     }
 
+    /**
+     * Returns a map of field names to {@link MongoMutableField} instances for this model.
+     *
+     * @return The map of field names to {@link MongoMutableField} instances.
+     */
     @Override
     public HashMap<String, MongoMutableField> fields() {
         return this.fields;
     }
 
+    /**
+     * Returns the parent {@link MongoSchemaHolder} for this model.
+     *
+     * @return The parent {@link MongoSchemaHolder}.
+     */
     public MongoSchemaHolder parent() {
         return this.parent;
     }

@@ -20,89 +20,28 @@
 
 package net.clydo.mongodb.operations.update;
 
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
-import lombok.val;
 import net.clydo.mongodb.operations.IOperations;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-
 public interface UpdateOneOperations<M> extends IOperations<M> {
     @NotNull UpdateResult one(@NotNull Bson filter, @NotNull Bson update);
 
-    default @NotNull UpdateResult one(@NotNull Bson filter, @NotNull M datum) {
-        val updates = new ArrayList<Bson>();
+    @NotNull UpdateResult one(@NotNull Bson filter, @NotNull M datum);
 
-        this.fields().forEach((key, field) -> {
-            updates.add(Updates.set(key, field.get(datum)));
-        });
+    @NotNull UpdateResult one(@NotNull Bson filter, @NotNull M datum, @NotNull String @NotNull ... justFields);
 
-        return this.one(filter, Updates.combine(updates));
-    }
+    @NotNull UpdateResult one(@NotNull String fieldName, @Nullable Object value, @NotNull M datum);
 
-    default @NotNull UpdateResult one(@NotNull Bson filter, @NotNull M datum, @NotNull String @NotNull ... justFields) {
-        val updates = new ArrayList<Bson>();
+    @NotNull UpdateResult one(@NotNull String fieldName, @Nullable Object value, @NotNull M datum, @NotNull String @NotNull ... justFields);
 
-        val fields = this.fields();
+    @NotNull UpdateResult one(@Nullable Object uniqueValue, @NotNull M datum);
 
-        for (@NotNull String justField : justFields) {
-            val field = fields.get(justField);
-            updates.add(Updates.set(justField, field.get(datum)));
-        }
+    @NotNull UpdateResult one(@Nullable Object uniqueValue, @NotNull M datum, @NotNull String @NotNull ... justFields);
 
-        return this.one(filter, Updates.combine(updates));
-    }
+    @NotNull UpdateResult one(@NotNull M datum);
 
-    default @NotNull UpdateResult one(@NotNull String fieldName, @Nullable Object value, @NotNull M datum) {
-        val updates = new ArrayList<Bson>();
-
-        this.fields().forEach((key, field) -> {
-            updates.add(Updates.set(key, field.get(datum)));
-        });
-
-        return this.one(Filters.eq(fieldName, value), Updates.combine(updates));
-    }
-
-    default @NotNull UpdateResult one(@NotNull String fieldName, @Nullable Object value, @NotNull M datum, @NotNull String @NotNull ... justFields) {
-        val updates = new ArrayList<Bson>();
-
-        val fields = this.fields();
-
-        for (@NotNull String justField : justFields) {
-            val field = fields.get(justField);
-            updates.add(Updates.set(justField, field.get(datum)));
-        }
-
-        return this.one(Filters.eq(fieldName, value), Updates.combine(updates));
-    }
-
-    default @NotNull UpdateResult one(@Nullable Object uniqueValue, @NotNull M datum) {
-        val fieldName = this.firstUniqueFieldName();
-
-        return this.one(fieldName, uniqueValue, datum);
-    }
-
-    default @NotNull UpdateResult one(@Nullable Object uniqueValue, @NotNull M datum, @NotNull String @NotNull ... justFields) {
-        val fieldName = this.firstUniqueFieldName();
-
-        return this.one(fieldName, uniqueValue, datum, justFields);
-    }
-
-    default @NotNull UpdateResult one(@NotNull M datum) {
-        val fieldName = this.firstUniqueFieldName();
-        val uniqueValue = this.getFieldValue(this.fields(), datum, fieldName);
-
-        return this.one(fieldName, uniqueValue, datum);
-    }
-
-    default @NotNull UpdateResult one(@NotNull M datum, @NotNull String @NotNull ... justFields) {
-        val fieldName = this.firstUniqueFieldName();
-        val uniqueValue = this.getFieldValue(this.fields(), datum, fieldName);
-
-        return this.one(fieldName, uniqueValue, datum, justFields);
-    }
+    @NotNull UpdateResult one(@NotNull M datum, @NotNull String @NotNull ... justFields);
 }

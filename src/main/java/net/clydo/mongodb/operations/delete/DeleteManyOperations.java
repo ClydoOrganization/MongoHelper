@@ -20,33 +20,19 @@
 
 package net.clydo.mongodb.operations.delete;
 
-import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
-import lombok.val;
 import net.clydo.mongodb.operations.IOperations;
-import org.bson.BsonDocument;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
 public interface DeleteManyOperations<M> extends IOperations<M> {
     @NotNull DeleteResult many(@NotNull Bson filter);
 
-    default @NotNull DeleteResult many() {
-        return this.many(new BsonDocument());
-    }
+    @NotNull DeleteResult many();
 
-    default @NotNull DeleteResult many(@NotNull String fieldName, @NotNull Object... uniqueValues) {
-        return this.many(Filters.in(fieldName, uniqueValues));
-    }
+    @NotNull DeleteResult many(@NotNull String fieldName, @NotNull Object... uniqueValues);
 
-    default @NotNull DeleteResult manyByUniques(@NotNull Object... uniqueValues) {
-        return this.many(this.firstUniqueFieldName(), uniqueValues);
-    }
+    @NotNull DeleteResult byUniques(@NotNull Object... uniqueValues);
 
-    default @NotNull DeleteResult many(@NotNull M... values) {
-        val fieldName = this.firstUniqueFieldName();
-        val uniqueValues = this.getFieldValues(this.fields(), values, fieldName);
-
-        return this.many(this.firstUniqueFieldName(), uniqueValues);
-    }
+    @NotNull DeleteResult many(@NotNull M... values);
 }

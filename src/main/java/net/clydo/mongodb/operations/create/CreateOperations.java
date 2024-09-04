@@ -28,16 +28,40 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * Provides operations for creating (inserting) documents into a MongoDB collection.
+ * This class extends {@link AbstractOperation} and implements {@link CreateOneOperations} and {@link CreateManyOperations}.
+ *
+ * @param <M> The type of the model for which create operations are performed.
+ */
 public class CreateOperations<M> extends AbstractOperation<M> implements CreateOneOperations<M>, CreateManyOperations<M> {
+
+    /**
+     * Constructs a new {@link CreateOperations} instance.
+     *
+     * @param model The {@link MongoModelValue} instance associated with the create operations.
+     */
     public CreateOperations(MongoModelValue<M> model) {
         super(model);
     }
 
+    /**
+     * Inserts a single document into the MongoDB collection.
+     *
+     * @param datum The document to be inserted.
+     * @return The result of the insert operation, including information about the inserted document.
+     */
     @Override
     public @NotNull InsertOneResult one(@NotNull M datum) {
         return this.collection().insertOne(datum);
     }
 
+    /**
+     * Inserts multiple documents into the MongoDB collection.
+     *
+     * @param data The documents to be inserted.
+     * @return The result of the insert operation, including information about the inserted documents.
+     */
     @SafeVarargs
     @Override
     public final @NotNull InsertManyResult many(@NotNull M... data) {

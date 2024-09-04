@@ -21,9 +21,7 @@
 package net.clydo.mongodb.operations.find;
 
 import com.mongodb.client.FindIterable;
-import com.mongodb.client.model.Filters;
 import net.clydo.mongodb.operations.IOperations;
-import org.bson.BsonDocument;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,11 +29,7 @@ import org.jetbrains.annotations.Nullable;
 public interface FindManyOperations<M> extends IOperations<M> {
     @NotNull FindIterable<M> many(@NotNull Bson filter);
 
-    default @NotNull FindIterable<M> many() {
-        return this.many(new BsonDocument());
-    }
+    @NotNull FindIterable<M> many();
 
-    default @NotNull FindIterable<M> many(@NotNull String fieldName, @Nullable Object value) {
-        return this.many(Filters.eq(fieldName, value));
-    }
+    @NotNull FindIterable<M> many(@NotNull String fieldName, @Nullable Object value);
 }

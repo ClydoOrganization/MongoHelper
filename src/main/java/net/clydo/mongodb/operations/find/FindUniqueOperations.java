@@ -20,10 +20,8 @@
 
 package net.clydo.mongodb.operations.find;
 
-import com.mongodb.client.model.Filters;
-import lombok.val;
-import net.clydo.mongodb.operations.IOperations;
 import net.clydo.mongodb.error.NotFoundResult;
+import net.clydo.mongodb.operations.IOperations;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,19 +29,9 @@ import org.jetbrains.annotations.Nullable;
 public interface FindUniqueOperations<M> extends IOperations<M> {
     @Nullable M unique(@NotNull Bson filter);
 
-    default @Nullable M unique(@NotNull String fieldName, @Nullable Object value) {
-        return this.unique(Filters.eq(fieldName, value));
-    }
+    @Nullable M unique(@NotNull String fieldName, @Nullable Object value);
 
-    default @Nullable M uniqueByUnique(@NotNull Object uniqueValue) {
-        return this.unique(this.firstUniqueFieldName(), uniqueValue);
-    }
+    @Nullable M uniqueByUnique(@NotNull Object uniqueValue);
 
-    default @NotNull M uniqueOrThrowRaw(@NotNull Bson filter) throws NotFoundResult {
-        val result = this.unique(filter);
-        if (result != null) {
-            return result;
-        }
-        throw new NotFoundResult("Failed to find data");
-    }
+    @NotNull M uniqueOrThrowRaw(@NotNull Bson filter) throws NotFoundResult;
 }

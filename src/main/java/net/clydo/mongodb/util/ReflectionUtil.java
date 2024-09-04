@@ -22,14 +22,10 @@ package net.clydo.mongodb.util;
 
 import lombok.experimental.UtilityClass;
 import lombok.val;
-import net.clydo.mongodb.annotations.MongoType;
-import org.bson.codecs.configuration.CodecConfigurationException;
 import org.jetbrains.annotations.NotNull;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
-import java.util.function.Supplier;
 
 @UtilityClass
 public class ReflectionUtil {

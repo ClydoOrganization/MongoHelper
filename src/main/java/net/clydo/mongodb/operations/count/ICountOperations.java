@@ -20,7 +20,6 @@
 
 package net.clydo.mongodb.operations.count;
 
-import com.mongodb.client.model.Filters;
 import net.clydo.mongodb.operations.IOperations;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +27,5 @@ import org.jetbrains.annotations.NotNull;
 public interface ICountOperations<M> extends IOperations<M> {
     long raw(@NotNull Bson filter);
 
-    default long raw(@NotNull String fieldName, @NotNull Object value) {
-        return this.raw(Filters.eq(fieldName, value));
-    }
+    long raw(@NotNull String fieldName, @NotNull Object value);
 }

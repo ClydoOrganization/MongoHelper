@@ -20,9 +20,7 @@
 
 package net.clydo.mongodb.operations.delete;
 
-import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
-import lombok.val;
 import net.clydo.mongodb.operations.IOperations;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
@@ -31,18 +29,9 @@ import org.jetbrains.annotations.Nullable;
 public interface DeleteOneOperations<M> extends IOperations<M> {
     @NotNull DeleteResult one(@NotNull Bson filter);
 
-    default @NotNull DeleteResult one(@NotNull String fieldName, @Nullable Object value) {
-        return this.one(Filters.eq(fieldName, value));
-    }
+    @NotNull DeleteResult one(@NotNull String fieldName, @Nullable Object value);
 
-    default @NotNull DeleteResult deleteByUnique(@NotNull Object uniqueValue) {
-        return this.one(this.firstUniqueFieldName(), uniqueValue);
-    }
+    @NotNull DeleteResult byUnique(@NotNull Object uniqueValue);
 
-    default @NotNull DeleteResult one(@NotNull M value) {
-        val fieldName = this.firstUniqueFieldName();
-        val uniqueValue = this.getFieldValue(this.fields(), value, fieldName);
-
-        return this.one(fieldName, uniqueValue);
-    }
+    @NotNull DeleteResult one(@NotNull M value);
 }
