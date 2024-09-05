@@ -1,3 +1,5 @@
+## [Installation](https://jitpack.io/#ClydoNetwork/MongoHelper)
+
 # Temporary README
 
 **Important:** This code is temporary and may contain errors or unfinished elements. Please review, revise, and replace it as soon as possible.
