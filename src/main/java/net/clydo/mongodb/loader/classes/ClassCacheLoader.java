@@ -8,11 +8,11 @@
  *
  * MongoHelper is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MongoHelper.  If not, see
+ * along with MongoHelper. If not, see
  * <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) 2024 ClydoNetwork
@@ -78,11 +78,13 @@ public class ClassCacheLoader {
                 field.setAccessible(true);
 
                 val unique = ReflectionUtil.hasAnnotation(field, MongoUnique.class);
+                val useFallback = ReflectionUtil.hasAnnotation(field, MongoUseFallback.class);
 
                 val fieldHolder = new MongoMutableField(
                         fieldName,
                         field,
-                        unique
+                        unique,
+                        useFallback
                 );
                 fields.put(
                         fieldName,

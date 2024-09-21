@@ -8,11 +8,11 @@
  *
  * MongoHelper is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MongoHelper.  If not, see
+ * along with MongoHelper. If not, see
  * <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) 2024 ClydoNetwork
@@ -61,8 +61,7 @@ public class TypeCodec<T> implements Codec<T> {
                 try {
                     return (T) constructor.newInstance();
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                    throw new CodecConfigurationException(String.format("Can not invoke no-args constructor for class %s", clazz),
-                            e);
+                    throw new CodecConfigurationException(String.format("Can not invoke no-args constructor for class %s", clazz), e);
                 }
             };
         } catch (NoSuchMethodException e) {

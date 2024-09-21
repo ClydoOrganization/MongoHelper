@@ -136,8 +136,6 @@ public class TestStart {
         val connectionString = "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.2.14&replicaSet=rs0";
 
         try (val mongoHelper = MongoHelpers.create(connectionString)) {
-            new Document();  // Initialization for schema creation
-
             // Create schema for UserModel
             mongoHelper.newSchema("test", UserModel.class);
 

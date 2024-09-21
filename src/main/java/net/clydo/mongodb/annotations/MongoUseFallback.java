@@ -18,10 +18,14 @@
  * Copyright (C) 2024 ClydoNetwork
  */
 
-package net.clydo.mongodb.loader.classes.values;
+package net.clydo.mongodb.annotations;
 
-import java.util.HashMap;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface ClassCacheValue {
-    HashMap<String, MongoMutableField> fields();
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface MongoUseFallback {
 }

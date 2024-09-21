@@ -8,11 +8,11 @@
  *
  * MongoHelper is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MongoHelper.  If not, see
+ * along with MongoHelper. If not, see
  * <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) 2024 ClydoNetwork
@@ -28,7 +28,8 @@ import java.lang.reflect.Field;
 public record MongoMutableField(
         String fieldName,
         Field field,
-        boolean unique
+        boolean unique,
+        boolean useFallback
 ) {
     public Object get(Object object) {
         try {
@@ -39,6 +40,10 @@ public record MongoMutableField(
     }
 
     public void set(Object object, Object value) {
+        if (this.useFallback && value == null) {
+            return;
+        }
+
         try {
             this.field.set(object, value);
         } catch (IllegalAccessException e) {
