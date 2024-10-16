@@ -23,11 +23,11 @@ package net.clydo.mongodb.loader;
 import lombok.val;
 import net.clydo.mongodb.annotations.MongoType;
 import net.clydo.mongodb.loader.classes.ClassCacheLoader;
-import net.clydo.mongodb.loader.enums.EnumCacheLoader;
 import net.clydo.mongodb.loader.classes.values.ClassCacheValue;
-import net.clydo.mongodb.loader.enums.values.MongoEnumValue;
 import net.clydo.mongodb.loader.classes.values.MongoModelValue;
 import net.clydo.mongodb.loader.classes.values.MongoTypeValue;
+import net.clydo.mongodb.loader.enums.EnumCacheLoader;
+import net.clydo.mongodb.loader.enums.values.MongoEnumValue;
 import net.clydo.mongodb.schematic.MongoSchemaHolder;
 import net.clydo.mongodb.util.ReflectionUtil;
 import org.jetbrains.annotations.NotNull;
@@ -46,15 +46,16 @@ public class LoaderRegistry {
         this.classCacheLoader = new ClassCacheLoader(this);
     }
 
-    public <T> void build(@NotNull Class<T> clazz) {
+    public <T> CacheValue build(@NotNull Class<T> clazz) {
         if (clazz.isEnum()) {
-            this.buildEnum(clazz);
+            return this.buildEnum(clazz);
         } else {
             val isMongoType = ReflectionUtil.hasAnnotation(clazz, MongoType.class, false);
             if (isMongoType) {
-                this.buildType(clazz);
+                return this.buildType(clazz);
             }
         }
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -78,7 +79,11 @@ public class LoaderRegistry {
     }
 
     public <T> ClassCacheValue getClass(Class<T> clazz) {
-        val value = this.cache.get(clazz);
+        var value = this.cache.get(clazz);
+
+        if (value == null) {
+            value = this.buildType(clazz);
+        }
 
         if (value instanceof ClassCacheValue classCacheValue)
             return classCacheValue;
@@ -108,7 +113,11 @@ public class LoaderRegistry {
 
     @SuppressWarnings("unchecked")
     public <C, E extends Enum<E>> MongoEnumValue<E> getEnum(Class<C> clazz) {
-        val value = this.cache.get(clazz);
+        var value = this.cache.get(clazz);
+
+        if (value == null) {
+            value = this.buildEnum(clazz);
+        }
 
         if (value instanceof MongoEnumValue<?> modelHolder)
             return (MongoEnumValue<E>) modelHolder;
