@@ -68,6 +68,10 @@ public class LoaderRegistry {
     @SuppressWarnings("unchecked")
     public <C> MongoTypeValue<C> buildType(Class<C> clazz) {
         val value = this.classCacheLoader.build(clazz, null);
+        if (value == null) {
+            return null;
+        }
+
         this.cache.put(clazz, value);
         return (MongoTypeValue<C>) value;
     }

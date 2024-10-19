@@ -45,6 +45,11 @@ public class ClassCacheLoader {
     }
 
     public <C> CacheValue build(Class<C> clazz, MongoSchemaHolder parent) {
+        val isMongoType = ReflectionUtil.hasAnnotation(clazz, MongoType.class, false);
+        if (!isMongoType) {
+            return null;
+        }
+
         val mongoModel = ReflectionUtil.getAnnotation(clazz, MongoModel.class);
 
         val fields = this.createFields(clazz);
