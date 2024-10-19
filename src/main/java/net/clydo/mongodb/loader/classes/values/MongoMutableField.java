@@ -20,10 +20,10 @@
 
 package net.clydo.mongodb.loader.classes.values;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
 public record MongoMutableField(
         String fieldName,
@@ -51,8 +51,11 @@ public record MongoMutableField(
         }
     }
 
-    @Contract(pure = true)
-    public @NotNull Class<?> fieldType() {
+    public @NotNull Class<?> type() {
         return this.field.getType();
+    }
+
+    public @NotNull Type genericType() {
+        return this.field.getGenericType();
     }
 }

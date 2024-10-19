@@ -42,7 +42,7 @@ public final class Primitives {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Class<T> wrap(Class<T> type) {
+    public static <T> Type wrap(Type type) {
         if (type == int.class) return (Class<T>) Integer.class;
         if (type == float.class) return (Class<T>) Float.class;
         if (type == byte.class) return (Class<T>) Byte.class;

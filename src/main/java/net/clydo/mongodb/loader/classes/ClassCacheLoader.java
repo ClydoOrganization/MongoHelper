@@ -22,10 +22,10 @@ package net.clydo.mongodb.loader.classes;
 
 import lombok.val;
 import net.clydo.mongodb.annotations.*;
-import net.clydo.mongodb.loader.LoaderRegistry;
-import net.clydo.mongodb.loader.classes.values.MongoMutableField;
 import net.clydo.mongodb.loader.CacheValue;
+import net.clydo.mongodb.loader.LoaderRegistry;
 import net.clydo.mongodb.loader.classes.values.MongoModelValue;
+import net.clydo.mongodb.loader.classes.values.MongoMutableField;
 import net.clydo.mongodb.loader.classes.values.MongoTypeValue;
 import net.clydo.mongodb.schematic.MongoSchemaHolder;
 import net.clydo.mongodb.util.ReflectionUtil;
@@ -96,7 +96,7 @@ public class ClassCacheLoader {
                         fieldHolder
                 );
 
-                this.registry.build(fieldHolder.fieldType());
+                this.registry.build(fieldHolder.type());
             }
         }
 

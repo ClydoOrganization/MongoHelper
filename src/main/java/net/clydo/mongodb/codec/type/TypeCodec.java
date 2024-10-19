@@ -36,6 +36,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.util.function.Supplier;
 
 public class TypeCodec<T> implements Codec<T> {
@@ -83,17 +84,21 @@ public class TypeCodec<T> implements Codec<T> {
             if (reader.getCurrentBsonType() == BsonType.NULL) {
                 reader.readNull();
             } else {
-                Class<?> type = null;
+                Type type = null;
                 val mongoFieldHolder = this.typeHolder.fields().get(fieldName);
 
                 if (mongoFieldHolder != null) {
-                    type = Primitives.wrap(mongoFieldHolder.fieldType());
+                    type = Primitives.wrap(mongoFieldHolder.genericType());
                 }
 
                 val value = CodecsHelper.readValue(reader, decoderContext, this.bsonTypeCodecMap, null, this.registry, this.transformer, type);
 
                 if (mongoFieldHolder != null) {
-                    mongoFieldHolder.set(result, type.cast(value));
+                    if (type instanceof Class<?> aClass) {
+                        mongoFieldHolder.set(result, aClass.cast(value));
+                    } else {
+                        mongoFieldHolder.set(result, value);
+                    }
                 }
             }
         }
@@ -115,14 +120,13 @@ public class TypeCodec<T> implements Codec<T> {
             }
 
             val fieldHolder = entry.getValue();
-            val field = fieldHolder.field();
 
             writer.writeName(fieldName);
             val value = fieldHolder.get(object);
             if (value == null) {
                 writer.writeNull();
             } else {
-                val codec = (Codec<Object>) CodecsHelper.getCodec(this.registry, Primitives.wrap(field.getType()));
+                val codec = (Codec<Object>) CodecsHelper.getCodec(this.registry, Primitives.wrap(fieldHolder.genericType()));
                 encoderContext.encodeWithChildContext(codec, writer, value);
             }
         }

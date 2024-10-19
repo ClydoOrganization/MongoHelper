@@ -56,7 +56,7 @@ public class CodecsHelper {
             final UuidRepresentation uuidRepresentation,
             final CodecRegistry registry,
             final Transformer valueTransformer,
-            final Class<?> type
+            final Type type
     ) {
         BsonType bsonType = reader.getCurrentBsonType();
         if (bsonType == BsonType.NULL) {
