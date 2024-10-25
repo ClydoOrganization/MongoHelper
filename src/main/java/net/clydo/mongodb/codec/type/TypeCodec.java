@@ -21,9 +21,13 @@
 package net.clydo.mongodb.codec.type;
 
 import lombok.val;
+import net.clydo.mongodb.annotations.MongoConstructor;
+import net.clydo.mongodb.annotations.MongoParameter;
 import net.clydo.mongodb.codec.CodecsHelper;
 import net.clydo.mongodb.loader.classes.values.ClassCacheValue;
+import net.clydo.mongodb.loader.classes.values.MongoMutableField;
 import net.clydo.mongodb.util.Primitives;
+import net.clydo.mongodb.util.ReflectionUtil;
 import org.bson.BsonReader;
 import org.bson.BsonType;
 import org.bson.BsonWriter;
@@ -34,10 +38,12 @@ import org.bson.codecs.configuration.CodecConfigurationException;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-import java.util.function.Supplier;
+import java.util.*;
 
 public class TypeCodec<T> implements Codec<T> {
     private final CodecRegistry registry;
@@ -46,6 +52,8 @@ public class TypeCodec<T> implements Codec<T> {
     private final Supplier<T> supplier;
     private final BsonTypeCodecMap bsonTypeCodecMap;
     private final Transformer transformer;
+    @Nullable
+    private final LinkedList<String> requiredFields;
 
     @Contract(pure = true)
     public TypeCodec(CodecRegistry registry, final BsonTypeClassMap bsonTypeClassMap, Transformer transformer, @NotNull Class<T> clazz, @NotNull ClassCacheValue typeHolder) {
@@ -55,57 +63,144 @@ public class TypeCodec<T> implements Codec<T> {
         this.bsonTypeCodecMap = new BsonTypeCodecMap(Assertions.notNull("bsonTypeClassMap", bsonTypeClassMap), registry);
         this.transformer = transformer;
 
+        val mongoConstructor = new MongoConstructor[1];
+        val constructor = Arrays.stream(clazz.getDeclaredConstructors())
+                .filter(constr -> (mongoConstructor[0] = ReflectionUtil.getAnnotation(constr, MongoConstructor.class, true)) != null)
+                .reduce((a, b) -> {
+                    throw new IllegalStateException("More than one constructor with @MongoConstructor annotation found");
+                })
+                .orElse(null);
+
         Supplier<T> supplier;
-        try {
-            val constructor = clazz.getDeclaredConstructor();
-            supplier = () -> {
+        if (constructor != null) {
+            this.requiredFields = new LinkedList<>();
+            val fields = this.typeHolder.fields();
+
+            val parameters = constructor.getParameters();
+            for (Parameter parameter : parameters) {
+                val mongoParameter = ReflectionUtil.getAnnotation(parameter, MongoParameter.class);
+                if (mongoParameter == null) {
+                    throw new IllegalStateException("All of parameters must be annotated with @MongoParameter");
+                }
+
+                val fieldName = mongoParameter.value();
+
+                val mongoFieldHolder = fields.get(fieldName);
+                if (mongoFieldHolder == null) {
+                    throw new IllegalStateException("No such field: " + fieldName);
+                }
+
+                if (!Objects.equals(mongoFieldHolder.genericType(), parameter.getParameterizedType())) {
+                    throw new IllegalStateException(
+                            "Mismatch between parameter type and @MongoField field type for field '" + fieldName +
+                                    "'. Expected: " + mongoFieldHolder.genericType() + ", but found: " + parameter.getParameterizedType()
+                    );
+                }
+
+                this.requiredFields.add(fieldName);
+            }
+
+            if (mongoConstructor[0] != null && mongoConstructor[0].requiredAll()) {
+                val allFieldsMatch = this.requiredFields.size() == fields.size() && this.requiredFields.containsAll(fields.keySet());
+
+                if (!allFieldsMatch) {
+                    throw new IllegalStateException(
+                            "All fields annotated with @MongoField must also be present as parameters in the constructor and annotated with @MongoParameter."
+                    );
+                }
+            }
+
+            supplier = (args) -> {
                 try {
-                    return (T) constructor.newInstance();
+                    //noinspection unchecked
+                    return (T) constructor.newInstance(args);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                    throw new CodecConfigurationException(String.format("Can not invoke no-args constructor for class %s", clazz), e);
+                    throw new CodecConfigurationException(String.format("Can not invoke constructor for class %s", clazz), e);
                 }
             };
-        } catch (NoSuchMethodException e) {
-            supplier = () -> {
-                throw new CodecConfigurationException(String.format("No no-args constructor for class %s", clazz), e);
-            };
+        } else {
+            this.requiredFields = null;
+
+            try {
+                val noArgsConstructor = clazz.getDeclaredConstructor();
+                supplier = (args) -> {
+                    try {
+                        return (T) noArgsConstructor.newInstance();
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                        throw new CodecConfigurationException(String.format("Can not invoke no-args constructor for class %s", clazz), e);
+                    }
+                };
+            } catch (NoSuchMethodException e) {
+                supplier = (args) -> {
+                    throw new CodecConfigurationException(String.format("No no-args constructor for class %s", clazz), e);
+                };
+            }
         }
         this.supplier = supplier;
     }
 
     @Override
     public T decode(BsonReader reader, DecoderContext decoderContext) {
-        val result = this.supplier.get();
-        reader.readStartDocument();
+        if (this.requiredFields != null) {
+            val values = new ArrayList<>(Collections.nCopies(this.requiredFields.size(), null));
 
-        while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-            val fieldName = reader.readName();
+            reader.readStartDocument();
 
-            if (reader.getCurrentBsonType() == BsonType.NULL) {
-                reader.readNull();
-            } else {
-                Type type = null;
-                val mongoFieldHolder = this.typeHolder.fields().get(fieldName);
-
-                if (mongoFieldHolder != null) {
-                    type = Primitives.wrap(mongoFieldHolder.genericType());
-                }
-
-                val value = CodecsHelper.readValue(reader, decoderContext, this.bsonTypeCodecMap, null, this.registry, this.transformer, type);
-
-                if (mongoFieldHolder != null) {
-                    if (type instanceof Class<?> aClass) {
-                        mongoFieldHolder.set(result, aClass.cast(value));
-                    } else {
-                        mongoFieldHolder.set(result, value);
+            while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                this.processField(reader, decoderContext, (fieldName, value, mongoFieldHolder) -> {
+                    if (!this.requiredFields.contains(fieldName)) {
+                        return;
                     }
-                }
+
+                    val index = this.requiredFields.indexOf(fieldName);
+                    values.set(index, value);
+                });
             }
+
+            reader.readEndDocument();
+
+            return this.supplier.get(values.toArray());
+        } else {
+            val result = this.supplier.get();
+
+            reader.readStartDocument();
+
+            while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                this.processField(reader, decoderContext, (fieldName, value, mongoFieldHolder) -> {
+                    if (mongoFieldHolder == null) {
+                        return;
+                    }
+
+                    mongoFieldHolder.set(result, value);
+                });
+            }
+
+            reader.readEndDocument();
+            return result;
+        }
+    }
+
+    private void processField(
+            @NotNull BsonReader reader,
+            DecoderContext decoderContext,
+            FieldProcessor processor
+    ) {
+        val fieldName = reader.readName();
+        if (reader.getCurrentBsonType() == BsonType.NULL) {
+            reader.readNull();
+            return;
         }
 
-        reader.readEndDocument();
+        Type type = null;
+        val mongoFieldHolder = this.typeHolder.fields().get(fieldName);
+        if (mongoFieldHolder != null) {
+            type = Primitives.wrap(mongoFieldHolder.genericType());
+        }
 
-        return result;
+        val value = CodecsHelper.readValue(
+                reader, decoderContext, this.bsonTypeCodecMap, null, this.registry, this.transformer, type
+        );
+        processor.process(fieldName, type instanceof Class<?> ? ((Class<?>) type).cast(value) : value, mongoFieldHolder);
     }
 
     @Override
@@ -138,4 +233,14 @@ public class TypeCodec<T> implements Codec<T> {
     public Class<T> getEncoderClass() {
         return this.clazz;
     }
+
+    @FunctionalInterface
+    private interface FieldProcessor {
+        void process(String fieldName, Object value, MongoMutableField mongoFieldHolder);
+    }
+
+    private interface Supplier<T> {
+        T get(Object... args);
+    }
+
 }
