@@ -20,8 +20,6 @@
 
 package net.clydo.mongodb.loader.classes.values;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
@@ -29,8 +27,14 @@ public record MongoMutableField(
         String fieldName,
         Field field,
         boolean unique,
-        boolean useFallback
+        boolean useDefault,
+        Class<?> type,
+        Type genericType
 ) {
+    public MongoMutableField {
+        field.setAccessible(true);
+    }
+
     public Object get(Object object) {
         try {
             return this.field.get(object);
@@ -40,7 +44,7 @@ public record MongoMutableField(
     }
 
     public void set(Object object, Object value) {
-        if (this.useFallback && value == null) {
+        if (this.useDefault && value == null) {
             return;
         }
 
@@ -49,13 +53,5 @@ public record MongoMutableField(
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public @NotNull Class<?> type() {
-        return this.field.getType();
-    }
-
-    public @NotNull Type genericType() {
-        return this.field.getGenericType();
     }
 }

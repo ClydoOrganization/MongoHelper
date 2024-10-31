@@ -21,7 +21,6 @@
 package net.clydo.mongodb.loader;
 
 import lombok.val;
-import net.clydo.mongodb.annotations.MongoType;
 import net.clydo.mongodb.loader.classes.ClassCacheLoader;
 import net.clydo.mongodb.loader.classes.values.ClassCacheValue;
 import net.clydo.mongodb.loader.classes.values.MongoModelValue;
@@ -29,7 +28,6 @@ import net.clydo.mongodb.loader.classes.values.MongoTypeValue;
 import net.clydo.mongodb.loader.enums.EnumCacheLoader;
 import net.clydo.mongodb.loader.enums.values.MongoEnumValue;
 import net.clydo.mongodb.schematic.MongoSchemaHolder;
-import net.clydo.mongodb.util.ReflectionUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -41,39 +39,38 @@ public class LoaderRegistry {
     private final ClassCacheLoader classCacheLoader;
 
     public LoaderRegistry() {
-        this.cache = new HashMap<>();
         this.enumCacheLoader = new EnumCacheLoader();
         this.classCacheLoader = new ClassCacheLoader(this);
+
+        this.cache = new HashMap<>();
     }
 
-    public <T> CacheValue build(@NotNull Class<T> clazz) {
-        if (clazz.isEnum()) {
-            return this.buildEnum(clazz);
+    public <T> void buildEnumOrType(@NotNull Class<T> clazz) {
+        if (Enum.class.isAssignableFrom(clazz)) {
+            this.buildEnum(clazz);
         } else {
-            val isMongoType = ReflectionUtil.hasAnnotation(clazz, MongoType.class, false);
-            if (isMongoType) {
-                return this.buildType(clazz);
-            }
+            this.buildType(clazz);
         }
-        return null;
     }
 
-    @SuppressWarnings("unchecked")
-    public <C> MongoModelValue<C> buildModel(Class<C> clazz, MongoSchemaHolder parent) {
-        val value = this.classCacheLoader.build(clazz, parent);
-        this.cache.put(clazz, value);
-        return (MongoModelValue<C>) value;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <C> MongoTypeValue<C> buildType(Class<C> clazz) {
-        val value = this.classCacheLoader.build(clazz, null);
-        if (value == null) {
+    public <C> MongoModelValue<C> buildModel(Class<C> clazz, MongoSchemaHolder schemaHolder) {
+        val mongoModel = this.classCacheLoader.buildModel(clazz, schemaHolder);
+        if (mongoModel == null) {
             return null;
         }
 
-        this.cache.put(clazz, value);
-        return (MongoTypeValue<C>) value;
+        this.cache.put(clazz, mongoModel);
+        return mongoModel;
+    }
+
+    public <C> MongoTypeValue<C> buildType(Class<C> clazz) {
+        val mongoType = this.classCacheLoader.buildType(clazz);
+        if (mongoType == null) {
+            return null;
+        }
+
+        this.cache.put(clazz, mongoType);
+        return mongoType;
     }
 
     public <C, E extends Enum<E>> MongoEnumValue<E> buildEnum(Class<C> clazz) {
@@ -82,14 +79,14 @@ public class LoaderRegistry {
         return value;
     }
 
-    public <T> ClassCacheValue getClass(Class<T> clazz) {
+    public <T> ClassCacheValue<?> getModelOrType(Class<T> clazz) {
         var value = this.cache.get(clazz);
 
         if (value == null) {
             value = this.buildType(clazz);
         }
 
-        if (value instanceof ClassCacheValue classCacheValue)
+        if (value instanceof ClassCacheValue<?> classCacheValue)
             return classCacheValue;
 
         return null;
@@ -112,7 +109,7 @@ public class LoaderRegistry {
         if (value instanceof MongoModelValue<?> modelHolder)
             return (MongoModelValue<T>) modelHolder;
 
-        return null;
+        throw new NullPointerException("Model not found for '" + clazz.getSimpleName() + "'. Ensure it is added in the 'newSchema' method.");
     }
 
     @SuppressWarnings("unchecked")
@@ -128,4 +125,5 @@ public class LoaderRegistry {
 
         return null;
     }
+
 }

@@ -21,6 +21,8 @@
 package net.clydo.mongodb.codec;
 
 import lombok.Getter;
+import lombok.experimental.UtilityClass;
+import lombok.val;
 import net.clydo.mongodb.codec.uuid.StringUUIDCodec;
 import org.bson.BsonReader;
 import org.bson.BsonType;
@@ -41,68 +43,68 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@UtilityClass
 public class CodecsHelper {
     @Getter
-    private static final CodecRegistry defaultCodecRegistry = CodecRegistries.fromProviders(List.of(
+    private final CodecRegistry defaultCodecRegistry = CodecRegistries.fromProviders(List.of(
             CodecRegistries.fromCodecs(
                     new StringUUIDCodec()
             )
     ));
 
-    public static @Nullable Object readValue(
+    public @Nullable Object readValue(
             final @NotNull BsonReader reader,
-            final DecoderContext decoderContext,
-            final BsonTypeCodecMap bsonTypeCodecMap,
-            final UuidRepresentation uuidRepresentation,
             final CodecRegistry registry,
+            final BsonTypeCodecMap bsonTypeCodecMap,
+            final DecoderContext decoderContext,
             final Transformer valueTransformer,
-            final Type type
+            final UuidRepresentation uuidRepresentation,
+            final Type type,
+            Codec<?> codec
     ) {
-        BsonType bsonType = reader.getCurrentBsonType();
+        val bsonType = reader.getCurrentBsonType();
         if (bsonType == BsonType.NULL) {
             reader.readNull();
             return null;
         }
 
-        Codec<?> codec = null;
         if (type != null) {
             codec = getCodec(registry, type);
         }
+
         if (codec == null) {
             codec = bsonTypeCodecMap.get(bsonType);
 
-            if (uuidRepresentation != null) {
-                if (bsonType == BsonType.BINARY && reader.peekBinarySize() == 16) {
-                    switch (reader.peekBinarySubType()) {
-                        case 3:
-                            if (uuidRepresentation == UuidRepresentation.JAVA_LEGACY
-                                    || uuidRepresentation == UuidRepresentation.C_SHARP_LEGACY
-                                    || uuidRepresentation == UuidRepresentation.PYTHON_LEGACY) {
-                                codec = registry.get(UUID.class);
-                            }
-                            break;
-                        case 4:
-                            if (uuidRepresentation == UuidRepresentation.STANDARD) {
-                                codec = registry.get(UUID.class);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
+            if (uuidRepresentation != null && bsonType == BsonType.BINARY && reader.peekBinarySize() == 16) {
+                int binarySubType = reader.peekBinarySubType();
+                if (binarySubType == 3 && isLegacyUuid(uuidRepresentation)) {
+                    codec = registry.get(UUID.class);
+                } else if (binarySubType == 4 && uuidRepresentation == UuidRepresentation.STANDARD) {
+                    codec = registry.get(UUID.class);
                 }
             }
         }
+
         if (codec == null) {
             return null;
         }
+
         return valueTransformer.transform(codec.decode(reader, decoderContext));
     }
 
-    public static Codec<?> getCodec(final CodecRegistry codecRegistry, final Type type) {
+    private boolean isLegacyUuid(UuidRepresentation uuidRepresentation) {
+        return uuidRepresentation == UuidRepresentation.JAVA_LEGACY
+                || uuidRepresentation == UuidRepresentation.C_SHARP_LEGACY
+                || uuidRepresentation == UuidRepresentation.PYTHON_LEGACY;
+    }
+
+    public Codec<?> getCodec(final CodecRegistry codecRegistry, final Type type) {
         if (type instanceof Class) {
             return codecRegistry.get((Class<?>) type);
         } else if (type instanceof ParameterizedType parameterizedType) {
-            return codecRegistry.get((Class<?>) parameterizedType.getRawType(), Arrays.asList(parameterizedType.getActualTypeArguments()));
+            val rawType = (Class<?>) parameterizedType.getRawType();
+            val typeArguments = Arrays.asList(parameterizedType.getActualTypeArguments());
+            return codecRegistry.get(rawType, typeArguments);
         } else {
             throw new CodecConfigurationException("Unsupported generic type of container: " + type);
         }

@@ -77,7 +77,7 @@ public class DeleteOperations<M> extends AbstractOperation<M> implements DeleteO
      * @return The result of the delete operation, including information about the deletion.
      */
     @Override
-    public @NotNull DeleteResult byUnique(@NotNull Object uniqueValue) {
+    public @NotNull DeleteResult unique(@NotNull Object uniqueValue) {
         return this.one(this.firstUniqueFieldName(), uniqueValue);
     }
 
@@ -90,7 +90,7 @@ public class DeleteOperations<M> extends AbstractOperation<M> implements DeleteO
     @Override
     public @NotNull DeleteResult one(@NotNull M value) {
         val fieldName = this.firstUniqueFieldName();
-        val uniqueValue = this.getFieldValue(this.fields(), value, fieldName);
+        val uniqueValue = this.getFieldValue(value, fieldName);
 
         return this.one(fieldName, uniqueValue);
     }
@@ -135,7 +135,7 @@ public class DeleteOperations<M> extends AbstractOperation<M> implements DeleteO
      * @return The result of the delete operation, including information about the deletions.
      */
     @Override
-    public @NotNull DeleteResult byUniques(@NotNull Object... uniqueValues) {
+    public @NotNull DeleteResult uniques(@NotNull Object... uniqueValues) {
         return this.many(this.firstUniqueFieldName(), uniqueValues);
     }
 
@@ -149,7 +149,7 @@ public class DeleteOperations<M> extends AbstractOperation<M> implements DeleteO
     @Override
     public final @NotNull DeleteResult many(@NotNull M... values) {
         val fieldName = this.firstUniqueFieldName();
-        val uniqueValues = this.getFieldValues(this.fields(), values, fieldName);
+        val uniqueValues = this.getFieldValues(values, fieldName);
 
         return this.many(this.firstUniqueFieldName(), uniqueValues);
     }

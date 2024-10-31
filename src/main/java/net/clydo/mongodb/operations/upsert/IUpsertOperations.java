@@ -27,17 +27,17 @@ import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
 public interface IUpsertOperations<M> extends IOperations<M> {
-    @NotNull UpdateResult raw(@NotNull Bson filter, @NotNull Bson update, @NotNull Bson create);
+    @NotNull UpdateResult one(@NotNull Bson filter, @NotNull Bson update, @NotNull Bson create);
 
-    @NotNull UpdateResult _replaceRaw(@NotNull Bson filter, @NotNull M datum, ReplaceOptions options);
+    @NotNull UpdateResult one(@NotNull Bson filter, @NotNull M datum, ReplaceOptions options);
 
-    @NotNull UpdateResult raw(@NotNull Bson filter, @NotNull M datum);
+    @NotNull UpdateResult one(@NotNull Bson filter, @NotNull M datum);
 
-    @NotNull UpdateResult raw(@NotNull Bson filter, @NotNull Bson update, @NotNull M create);
+    @NotNull UpdateResult one(@NotNull Bson filter, @NotNull Bson update, @NotNull M create);
 
-    @NotNull UpdateResult raw(@NotNull Bson filter, @NotNull Bson update, @NotNull M create, @NotNull String @NotNull ... justFields);
+    @NotNull UpdateResult one(@NotNull Bson filter, @NotNull Bson update, @NotNull M create, @NotNull String @NotNull ... justFields);
 
-    @NotNull UpdateResult raw(@NotNull M datum, @NotNull String @NotNull ... justFields);
+    @NotNull UpdateResult one(@NotNull M datum, @NotNull String @NotNull ... justFields);
 
-    @NotNull UpdateResult raw(@NotNull M datum);
+    @NotNull UpdateResult one(@NotNull M datum);
 }

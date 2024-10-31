@@ -41,17 +41,16 @@ public final class Primitives {
                 || type == Void.class;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Type wrap(Type type) {
-        if (type == int.class) return (Class<T>) Integer.class;
-        if (type == float.class) return (Class<T>) Float.class;
-        if (type == byte.class) return (Class<T>) Byte.class;
-        if (type == double.class) return (Class<T>) Double.class;
-        if (type == long.class) return (Class<T>) Long.class;
-        if (type == char.class) return (Class<T>) Character.class;
-        if (type == boolean.class) return (Class<T>) Boolean.class;
-        if (type == short.class) return (Class<T>) Short.class;
-        if (type == void.class) return (Class<T>) Void.class;
+    public static Type wrap(Type type) {
+        if (type == int.class) return Integer.class;
+        if (type == float.class) return Float.class;
+        if (type == byte.class) return Byte.class;
+        if (type == double.class) return Double.class;
+        if (type == long.class) return Long.class;
+        if (type == char.class) return Character.class;
+        if (type == boolean.class) return Boolean.class;
+        if (type == short.class) return Short.class;
+        if (type == void.class) return Void.class;
         return type;
     }
 

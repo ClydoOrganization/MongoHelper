@@ -27,11 +27,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface FindFirstOperations<M> extends IOperations<M> {
-    @Nullable M first(@NotNull Bson filter);
+    @Nullable M one(@NotNull Bson filter);
 
-    @Nullable M first();
+    @Nullable M one();
 
-    @Nullable M first(@NotNull String fieldName, @Nullable Object value);
+    @Nullable M one(@NotNull String fieldName, @Nullable Object value);
 
     @Nullable M firstByUnique(@NotNull Object uniqueValue);
 

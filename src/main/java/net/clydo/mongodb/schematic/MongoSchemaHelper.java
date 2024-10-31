@@ -24,9 +24,9 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import lombok.val;
+import net.clydo.mongodb.MongoHelper;
 import net.clydo.mongodb.codec.CodecsHelper;
 import net.clydo.mongodb.codec.type.ClassCodecProvider;
-import net.clydo.mongodb.MongoHelper;
 import net.clydo.mongodb.loader.LoaderRegistry;
 import net.clydo.mongodb.loader.classes.values.MongoModelValue;
 import org.bson.codecs.configuration.CodecRegistries;
@@ -100,7 +100,7 @@ public class MongoSchemaHelper {
     private @NotNull ArrayList<CodecRegistry> createCodecRegistry(CodecRegistry codecRegistry) {
         val codecRegistries = new ArrayList<>(Arrays.asList(
                 CodecRegistries.fromProviders(
-                        new ClassCodecProvider(this.registry)
+                        new ClassCodecProvider(this, this.registry)
                 ),
                 CodecsHelper.getDefaultCodecRegistry(),
                 MongoClientSettings.getDefaultCodecRegistry()
@@ -111,7 +111,16 @@ public class MongoSchemaHelper {
         return codecRegistries;
     }
 
-    public @Nullable <M> MongoModelValue<M> getModel(Class<M> clazz) {
+    public @NotNull <M> MongoModelValue<M> getModel(Class<M> clazz) {
         return this.registry.getModel(clazz);
     }
+
+    public @Nullable <M> MongoModelValue<M> getModelNullable(Class<M> clazz) {
+        try {
+            return this.registry.getModel(clazz);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }

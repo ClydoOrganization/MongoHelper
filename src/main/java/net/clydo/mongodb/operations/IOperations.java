@@ -24,6 +24,7 @@ import net.clydo.mongodb.loader.classes.values.MongoMutableField;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public interface IOperations<M> {
     @NotNull String firstUniqueFieldName();
@@ -33,4 +34,25 @@ public interface IOperations<M> {
     Object[] getFieldValues(HashMap<String, MongoMutableField> fields, @NotNull M @NotNull [] data, @NotNull String fieldName);
 
     Object getFieldValue(@NotNull HashMap<String, MongoMutableField> fields, @NotNull M datum, @NotNull String fieldName);
+
+    default MongoMutableField firstUniqueField() {
+        return this.fields().get(this.firstUniqueFieldName());
+    }
+
+    default Object[] getFieldValues(@NotNull M @NotNull [] data, @NotNull String fieldName) {
+        return this.getFieldValues(this.fields(), data, fieldName);
+    }
+
+    default Object getFieldValue(@NotNull M datum, @NotNull String fieldName) {
+        return this.getFieldValue(this.fields(), datum, fieldName);
+    }
+
+    default Object getUniqueFieldValue(@NotNull M datum) {
+        return Objects.requireNonNull(this.getFieldValue(this.fields(), datum, this.firstUniqueFieldName()), "unique field value must not be null");
+    }
+
+    default Object getUniqueFieldValue(@NotNull HashMap<String, MongoMutableField> fields, @NotNull M datum) {
+        return Objects.requireNonNull(this.getFieldValue(fields, datum, this.firstUniqueFieldName()), "unique field value must not be null");
+    }
+
 }

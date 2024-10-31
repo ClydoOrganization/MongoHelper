@@ -22,6 +22,10 @@ package net.clydo.mongodb.loader.classes.values;
 
 import java.util.HashMap;
 
-public interface ClassCacheValue {
+public interface ClassCacheValue<T> {
+
     HashMap<String, MongoMutableField> fields();
+
+    Class<T> type();
+
 }

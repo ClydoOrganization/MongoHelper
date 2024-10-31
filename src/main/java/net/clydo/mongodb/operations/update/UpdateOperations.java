@@ -183,7 +183,7 @@ public class UpdateOperations<M> extends AbstractOperation<M> implements UpdateO
     @Override
     public @NotNull UpdateResult one(@NotNull M datum) {
         val fieldName = this.firstUniqueFieldName();
-        val uniqueValue = this.getFieldValue(this.fields(), datum, fieldName);
+        val uniqueValue = this.getFieldValue(datum, fieldName);
 
         return this.one(fieldName, uniqueValue, datum);
     }
@@ -199,7 +199,7 @@ public class UpdateOperations<M> extends AbstractOperation<M> implements UpdateO
     @Override
     public @NotNull UpdateResult one(@NotNull M datum, @NotNull String @NotNull ... justFields) {
         val fieldName = this.firstUniqueFieldName();
-        val uniqueValue = this.getFieldValue(this.fields(), datum, fieldName);
+        val uniqueValue = this.getFieldValue(datum, fieldName);
 
         return this.one(fieldName, uniqueValue, datum, justFields);
     }

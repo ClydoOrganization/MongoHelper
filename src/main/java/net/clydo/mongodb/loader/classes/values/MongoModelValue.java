@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  *
  * @param <M> The type of the model.
  */
-public final class MongoModelValue<M> implements CacheValue, ClassCacheValue {
+public final class MongoModelValue<M> implements CacheValue, ClassCacheValue<M> {
     private final Class<M> type;
     private final String modelName;
     private final MongoCollection<M> collection;

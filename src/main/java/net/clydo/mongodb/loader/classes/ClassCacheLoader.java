@@ -22,20 +22,21 @@ package net.clydo.mongodb.loader.classes;
 
 import lombok.val;
 import net.clydo.mongodb.annotations.*;
-import net.clydo.mongodb.loader.CacheValue;
 import net.clydo.mongodb.loader.LoaderRegistry;
 import net.clydo.mongodb.loader.classes.values.MongoModelValue;
 import net.clydo.mongodb.loader.classes.values.MongoMutableField;
 import net.clydo.mongodb.loader.classes.values.MongoTypeValue;
 import net.clydo.mongodb.schematic.MongoSchemaHolder;
 import net.clydo.mongodb.util.ReflectionUtil;
+import org.apache.commons.lang3.reflect.TypeUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bson.types.ObjectId;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class ClassCacheLoader {
     private final LoaderRegistry registry;
@@ -44,61 +45,81 @@ public class ClassCacheLoader {
         this.registry = registry;
     }
 
-    public <C> CacheValue build(Class<C> clazz, MongoSchemaHolder parent) {
-        val isMongoType = ReflectionUtil.hasAnnotation(clazz, MongoType.class, false);
+    public <C> MongoModelValue<C> buildModel(Class<C> clazz, MongoSchemaHolder schemaHolder) {
+        Objects.requireNonNull(schemaHolder, "The schema holder cannot be null.");
+        Objects.requireNonNull(clazz, "The model class cannot be null.");
+
+        val mongoModel = ReflectionUtil.getAnnotation(clazz, MongoModel.class);
+        Objects.requireNonNull(mongoModel, "Class " + clazz.getSimpleName() + " must be annotated with @MongoModel.");
+
+        val fields = this.collectFields(clazz, schemaHolder);
+
+        return MongoModelValue.of(clazz, fields, mongoModel.value(), schemaHolder);
+    }
+
+    public <C> MongoTypeValue<C> buildType(Class<C> clazz) {
+        val isMongoType = ReflectionUtil.hasAnnotation(clazz, MongoType.class, true);
         if (!isMongoType) {
             return null;
         }
 
-        val mongoModel = ReflectionUtil.getAnnotation(clazz, MongoModel.class);
+        val fields = this.collectFields(clazz, null);
 
-        val fields = this.createFields(clazz);
-
-        return this.createHolder(clazz, mongoModel, fields, parent);
+        return MongoTypeValue.of(clazz, fields);
     }
 
-    @Contract("_, _, _, _ -> new")
-    private <C> @Unmodifiable @NotNull CacheValue createHolder(Class<C> clazz, MongoModel mongoModel, HashMap<String, MongoMutableField> fields, MongoSchemaHolder parent) {
-        if (mongoModel != null && parent != null) {
-            return MongoModelValue.of(clazz, fields, mongoModel.value(), parent);
-        } else {
-            return MongoTypeValue.of(clazz, fields);
-        }
-    }
-
-    protected <M> @NotNull HashMap<String, MongoMutableField> createFields(@NotNull Class<M> clazz) {
+    protected <M> @NotNull HashMap<String, MongoMutableField> collectFields(@NotNull Class<M> clazz, MongoSchemaHolder schemaHolder) {
         val fields = new HashMap<String, MongoMutableField>();
 
-        for (Field field : clazz.getDeclaredFields()) {
-            val mongoFieldInfo = ReflectionUtil.getAnnotation(field, MongoField.class);
+        Arrays.stream(clazz.getDeclaredFields())
+                .map(field -> Pair.of(field, ReflectionUtil.getAnnotation(field, MongoField.class)))
+                .filter(pair -> pair.getLeft() != null && pair.getRight() != null)
+                .forEach(entry -> {
+                    val field = entry.getLeft();
+                    val mongoFieldInfo = entry.getRight();
 
-            if (mongoFieldInfo != null) {
-                val fieldName = mongoFieldInfo.value();
-                val fieldType = field.getType();
+                    val fieldName = mongoFieldInfo.value();
+                    val fieldType = field.getType();
+                    val fieldGenericType = field.getGenericType();
 
-                if ("_id".equals(fieldName) && fieldType != ObjectId.class) {
-                    throw new IllegalStateException("");
-                }
+                    if ("_id".equals(fieldName) && fieldType != ObjectId.class) {
+                        throw new IllegalStateException("The field '_id' must have type ObjectId.");
+                    }
 
-                field.setAccessible(true);
+                    val unique = ReflectionUtil.hasAnnotation(field, MongoUnique.class);
+                    val useDefault = ReflectionUtil.hasAnnotation(field, MongoUseDefault.class);
 
-                val unique = ReflectionUtil.hasAnnotation(field, MongoUnique.class);
-                val useFallback = ReflectionUtil.hasAnnotation(field, MongoUseFallback.class);
+                    val mongoField = new MongoMutableField(
+                            fieldName,
+                            field,
+                            unique,
+                            useDefault,
+                            fieldType,
+                            fieldGenericType
+                    );
 
-                val fieldHolder = new MongoMutableField(
-                        fieldName,
-                        field,
-                        unique,
-                        useFallback
-                );
-                fields.put(
-                        fieldName,
-                        fieldHolder
-                );
+                    fields.put(fieldName, mongoField);
 
-                this.registry.build(fieldHolder.type());
-            }
-        }
+                    if (mongoField.genericType() instanceof ParameterizedType parameterizedType) {
+                        TypeUtils.getTypeArguments(parameterizedType)
+                                .values().stream()
+                                .filter(type -> type instanceof Class<?>)
+                                .map(type -> (Class<?>) type)
+                                .forEach(aClass -> {
+                                    try {
+                                        if (schemaHolder != null) {
+                                            this.registry.buildModel(aClass, schemaHolder);
+                                            return;
+                                        }
+
+                                        this.registry.buildType(aClass);
+                                    } catch (Exception ignored) {
+                                    }
+                                });
+                    }
+
+                    this.registry.buildEnumOrType(mongoField.type());
+                });
 
         return fields;
     }

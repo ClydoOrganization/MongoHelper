@@ -61,7 +61,7 @@ public class UpsertOperations<M> extends AbstractOperation<M> implements IUpsert
      * @return The result of the upsert operation.
      */
     @Override
-    public @NotNull UpdateResult raw(@NotNull Bson filter, @NotNull Bson update, @NotNull Bson create) {
+    public @NotNull UpdateResult one(@NotNull Bson filter, @NotNull Bson update, @NotNull Bson create) {
         val combined = Updates.combine(
                 update,
                 create
@@ -84,7 +84,7 @@ public class UpsertOperations<M> extends AbstractOperation<M> implements IUpsert
      * @return The result of the replace operation.
      */
     @Override
-    public @NotNull UpdateResult _replaceRaw(@NotNull Bson filter, @NotNull M datum, ReplaceOptions replaceOptions) {
+    public @NotNull UpdateResult one(@NotNull Bson filter, @NotNull M datum, ReplaceOptions replaceOptions) {
         return this.collection().replaceOne(filter, datum, replaceOptions);
     }
 
@@ -97,8 +97,8 @@ public class UpsertOperations<M> extends AbstractOperation<M> implements IUpsert
      * @return The result of the upsert operation.
      */
     @Override
-    public @NotNull UpdateResult raw(@NotNull Bson filter, @NotNull M datum) {
-        return this._replaceRaw(filter, datum, new ReplaceOptions().upsert(true));
+    public @NotNull UpdateResult one(@NotNull Bson filter, @NotNull M datum) {
+        return this.one(filter, datum, new ReplaceOptions().upsert(true));
     }
 
     /**
@@ -111,13 +111,11 @@ public class UpsertOperations<M> extends AbstractOperation<M> implements IUpsert
      * @return The result of the upsert operation.
      */
     @Override
-    public @NotNull UpdateResult raw(@NotNull Bson filter, @NotNull Bson update, @NotNull M create) {
+    public @NotNull UpdateResult one(@NotNull Bson filter, @NotNull Bson update, @NotNull M create) {
         val creates = new ArrayList<Bson>();
-        this.fields().forEach((key, field) -> {
-            creates.add(Updates.setOnInsert(key, field.get(create)));
-        });
+        this.fields().forEach((key, field) -> creates.add(Updates.setOnInsert(key, field.get(create))));
 
-        return this.raw(filter, update, Updates.combine(creates));
+        return this.one(filter, update, Updates.combine(creates));
     }
 
     /**
@@ -131,7 +129,7 @@ public class UpsertOperations<M> extends AbstractOperation<M> implements IUpsert
      * @return The result of the upsert operation.
      */
     @Override
-    public @NotNull UpdateResult raw(@NotNull Bson filter, @NotNull Bson update, @NotNull M create, @NotNull String @NotNull ... justFields) {
+    public @NotNull UpdateResult one(@NotNull Bson filter, @NotNull Bson update, @NotNull M create, @NotNull String @NotNull ... justFields) {
         val creates = new ArrayList<Bson>();
 
         val fields = this.fields();
@@ -144,7 +142,7 @@ public class UpsertOperations<M> extends AbstractOperation<M> implements IUpsert
             creates.add(Updates.setOnInsert(justField, field.get(create)));
         }
 
-        return this.raw(filter, update, Updates.combine(creates));
+        return this.one(filter, update, Updates.combine(creates));
     }
 
     /**
@@ -156,7 +154,7 @@ public class UpsertOperations<M> extends AbstractOperation<M> implements IUpsert
      * @return The result of the upsert operation.
      */
     @Override
-    public @NotNull UpdateResult raw(@NotNull M datum, @NotNull String @NotNull ... justFields) {
+    public @NotNull UpdateResult one(@NotNull M datum, @NotNull String @NotNull ... justFields) {
         val justFieldsList = List.of(justFields);
 
         val fields = this.fields();
@@ -182,9 +180,9 @@ public class UpsertOperations<M> extends AbstractOperation<M> implements IUpsert
         }
 
         val fieldName = this.firstUniqueFieldName();
-        val uniqueValue = this.getFieldValue(this.fields(), datum, fieldName);
+        val uniqueValue = this.getFieldValue(datum, fieldName);
 
-        return this.raw(Filters.eq(fieldName, uniqueValue), Updates.combine(updates), Updates.combine(creates));
+        return this.one(Filters.eq(fieldName, uniqueValue), Updates.combine(updates), Updates.combine(creates));
     }
 
     /**
@@ -195,10 +193,10 @@ public class UpsertOperations<M> extends AbstractOperation<M> implements IUpsert
      * @return The result of the upsert operation.
      */
     @Override
-    public @NotNull UpdateResult raw(@NotNull M datum) {
+    public @NotNull UpdateResult one(@NotNull M datum) {
         val fieldName = this.firstUniqueFieldName();
-        val uniqueValue = this.getFieldValue(this.fields(), datum, fieldName);
+        val uniqueValue = this.getFieldValue(datum, fieldName);
 
-        return this._replaceRaw(Filters.eq(fieldName, uniqueValue), datum, new ReplaceOptions().upsert(true));
+        return this.one(Filters.eq(fieldName, uniqueValue), datum, new ReplaceOptions().upsert(true));
     }
 }

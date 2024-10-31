@@ -24,6 +24,7 @@ import com.mongodb.DocumentToDBRefTransformer;
 import lombok.val;
 import net.clydo.mongodb.MongoHelpers;
 import net.clydo.mongodb.loader.LoaderRegistry;
+import net.clydo.mongodb.schematic.MongoSchemaHelper;
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -35,15 +36,17 @@ import java.util.List;
 public class ClassCodecProvider implements CodecProvider {
     private static final DocumentToDBRefTransformer TRANSFORMER = new DocumentToDBRefTransformer();
 
+    private final MongoSchemaHelper schemaHelper;
     private final LoaderRegistry registry;
 
-    public ClassCodecProvider(final LoaderRegistry registry) {
+    public ClassCodecProvider(final MongoSchemaHelper schemaHelper, final LoaderRegistry registry) {
+        this.schemaHelper = schemaHelper;
         this.registry = registry;
     }
 
     @Override
     public <T> Codec<T> get(Class<T> clazz, CodecRegistry registry) {
-        return get(clazz, Collections.emptyList(), registry);
+        return this.get(clazz, Collections.emptyList(), registry);
     }
 
     @Override
@@ -57,11 +60,11 @@ public class ClassCodecProvider implements CodecProvider {
             return (Codec<T>) new EnumCodec(clazz, encoder);
         }
 
-        val typeHolder = this.registry.getClass(clazz);
+        val typeHolder = this.registry.getModelOrType(clazz);
         if (typeHolder == null) {
             return null;
         }
 
-        return new TypeCodec<>(registry, MongoHelpers.getDefaultBsonTypeClassMap(), TRANSFORMER, clazz, typeHolder);
+        return new TypeCodec<>(registry, MongoHelpers.getDefaultBsonTypeClassMap(), TRANSFORMER, clazz, typeHolder, this.schemaHelper, this.registry);
     }
 }

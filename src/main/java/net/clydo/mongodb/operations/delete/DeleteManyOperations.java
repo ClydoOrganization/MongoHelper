@@ -28,11 +28,11 @@ import org.jetbrains.annotations.NotNull;
 public interface DeleteManyOperations<M> extends IOperations<M> {
     @NotNull DeleteResult many(@NotNull Bson filter);
 
-    @NotNull DeleteResult many();
+    @NotNull DeleteResult all();
 
     @NotNull DeleteResult many(@NotNull String fieldName, @NotNull Object... uniqueValues);
 
-    @NotNull DeleteResult byUniques(@NotNull Object... uniqueValues);
+    @NotNull DeleteResult uniques(@NotNull Object... uniqueValues);
 
     @NotNull DeleteResult many(@NotNull M... values);
 }

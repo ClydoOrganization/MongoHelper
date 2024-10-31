@@ -55,7 +55,7 @@ public class FindOperations<M> extends AbstractOperation<M> implements FindFirst
      * @return The first document that matches the filter, or {@code null} if no document matches.
      */
     @Override
-    public @Nullable M first(@NotNull Bson filter) {
+    public @Nullable M one(@NotNull Bson filter) {
         return this.collection().find(filter).first();
     }
 
@@ -65,8 +65,8 @@ public class FindOperations<M> extends AbstractOperation<M> implements FindFirst
      * @return The first document in the collection, or {@code null} if no document is found.
      */
     @Override
-    public @Nullable M first() {
-        return this.first(new BsonDocument());
+    public @Nullable M one() {
+        return this.one(new BsonDocument());
     }
 
     /**
@@ -77,8 +77,8 @@ public class FindOperations<M> extends AbstractOperation<M> implements FindFirst
      * @return The first document that matches the field and value, or {@code null} if no document matches.
      */
     @Override
-    public @Nullable M first(@NotNull String fieldName, @Nullable Object value) {
-        return this.first(Filters.eq(fieldName, value));
+    public @Nullable M one(@NotNull String fieldName, @Nullable Object value) {
+        return this.one(Filters.eq(fieldName, value));
     }
 
     /**
@@ -89,7 +89,7 @@ public class FindOperations<M> extends AbstractOperation<M> implements FindFirst
      */
     @Override
     public @Nullable M firstByUnique(@NotNull Object uniqueValue) {
-        return this.first(this.firstUniqueFieldName(), uniqueValue);
+        return this.one(this.firstUniqueFieldName(), uniqueValue);
     }
 
     /**
@@ -101,7 +101,7 @@ public class FindOperations<M> extends AbstractOperation<M> implements FindFirst
      */
     @Override
     public @NotNull M firstOrThrowRaw(@NotNull Bson filter) throws NotFoundResult {
-        val result = this.first(filter);
+        val result = this.one(filter);
         if (result != null) {
             return result;
         }
@@ -118,7 +118,7 @@ public class FindOperations<M> extends AbstractOperation<M> implements FindFirst
     @Override
     public @Nullable M unique(@NotNull Bson filter) {
         this.validateFilterUniques(filter, this.uniques());
-        return this.first(filter);
+        return this.one(filter);
     }
 
     /**

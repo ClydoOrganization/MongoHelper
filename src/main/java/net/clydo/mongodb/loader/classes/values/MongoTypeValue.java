@@ -29,7 +29,7 @@ import java.util.HashMap;
 public record MongoTypeValue<T>(
         Class<T> type,
         HashMap<String, MongoMutableField> fields
-) implements CacheValue, ClassCacheValue {
+) implements CacheValue, ClassCacheValue<T> {
 
     @Contract("_, _ -> new")
     public static <T> @NotNull MongoTypeValue<T> of(

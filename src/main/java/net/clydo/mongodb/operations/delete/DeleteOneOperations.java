@@ -31,7 +31,7 @@ public interface DeleteOneOperations<M> extends IOperations<M> {
 
     @NotNull DeleteResult one(@NotNull String fieldName, @Nullable Object value);
 
-    @NotNull DeleteResult byUnique(@NotNull Object uniqueValue);
+    @NotNull DeleteResult unique(@NotNull Object uniqueValue);
 
     @NotNull DeleteResult one(@NotNull M value);
 }

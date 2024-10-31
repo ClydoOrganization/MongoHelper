@@ -22,7 +22,6 @@ package net.clydo.mongodb;
 
 import com.mongodb.client.MongoClient;
 import lombok.Getter;
-import lombok.val;
 import net.clydo.mongodb.loader.classes.values.MongoModelValue;
 import net.clydo.mongodb.schematic.MongoSchemaHelper;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -36,7 +35,7 @@ import java.io.Closeable;
  */
 public class MongoHelper implements Closeable {
     @Getter
-    protected MongoClient mongoClient;
+    protected final MongoClient mongoClient;
     private final MongoSchemaHelper schemaHelper;
 
     /**
@@ -90,11 +89,7 @@ public class MongoHelper implements Closeable {
      * @throws NullPointerException If no model is found for the specified class.
      */
     public <M> @NotNull MongoModelValue<M> getModel(Class<M> clazz) {
-        val model = this.schemaHelper.getModel(clazz);
-        if (model != null) {
-            return model;
-        }
-        throw new NullPointerException("No model found for " + clazz);
+        return this.schemaHelper.getModel(clazz);
     }
 
     /**

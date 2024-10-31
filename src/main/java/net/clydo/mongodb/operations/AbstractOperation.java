@@ -60,7 +60,7 @@ public class AbstractOperation<M> implements IOperations<M> {
 
         val value = field.get(datum);
         if (value == null) {
-            throw new NullPointerException(fieldName + " unique value is null");
+            throw new NullPointerException(fieldName + (field.unique() ? " unique" : "") + " value is null");
         }
 
         return value;
@@ -81,11 +81,12 @@ public class AbstractOperation<M> implements IOperations<M> {
 
     @Override
     public @NotNull String firstUniqueFieldName() {
-        if (this.uniques().size() > 1) {
+        val uniques = this.uniques();
+        if (uniques.size() > 1) {
             throw new IllegalStateException("More than one unique field found");
         }
 
-        val fieldName = this.uniques().get(0);
+        val fieldName = uniques.get(0);
         if (fieldName != null) {
             return fieldName;
         }
