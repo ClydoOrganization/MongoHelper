@@ -29,5 +29,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.CONSTRUCTOR)
 @MongoType
 public @interface MongoConstructor {
-    boolean requiredAll() default false;
+    boolean requiredAll() default true;
 }
