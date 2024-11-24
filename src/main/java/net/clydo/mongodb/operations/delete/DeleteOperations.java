@@ -112,7 +112,7 @@ public class DeleteOperations<M> extends AbstractOperation<M> implements DeleteO
      * @return The result of the delete operation, including information about the deletions.
      */
     @Override
-    public @NotNull DeleteResult many() {
+    public @NotNull DeleteResult all() {
         return this.many(new BsonDocument());
     }
 
