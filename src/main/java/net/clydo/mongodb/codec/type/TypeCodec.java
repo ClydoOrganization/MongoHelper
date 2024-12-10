@@ -92,7 +92,7 @@ public class TypeCodec<T> implements Codec<T> {
                     throw new IllegalStateException("No such field: " + fieldName);
                 }
 
-                if (!Objects.equals(mongoFieldHolder.genericType(), Primitives.wrap(parameter.getParameterizedType()))) {
+                if (!Objects.equals(mongoFieldHolder.genericType(), parameter.getParameterizedType())) {
                     throw new IllegalStateException(
                             "Mismatch between parameter type and @MongoField field type for field '" + fieldName +
                                     "'. Expected: " + mongoFieldHolder.genericType() + ", but found: " + parameter.getParameterizedType()
