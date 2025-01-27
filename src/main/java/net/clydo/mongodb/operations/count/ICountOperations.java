@@ -28,4 +28,7 @@ public interface ICountOperations<M> extends IOperations<M> {
     long raw(@NotNull Bson filter);
 
     long raw(@NotNull String fieldName, @NotNull Object value);
+
+    long raw(@NotNull Object value);
+
 }

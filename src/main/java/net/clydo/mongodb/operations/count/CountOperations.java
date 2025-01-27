@@ -65,4 +65,9 @@ public class CountOperations<M> extends AbstractOperation<M> implements ICountOp
     public long raw(@NotNull String fieldName, @NotNull Object value) {
         return this.raw(Filters.eq(fieldName, value));
     }
+
+    @Override
+    public long raw(@NotNull Object value) {
+        return this.raw(this.firstUniqueFieldName(), value);
+    }
 }
