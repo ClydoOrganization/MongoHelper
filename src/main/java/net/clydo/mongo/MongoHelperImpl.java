@@ -21,37 +21,15 @@
 package net.clydo.mongo;
 
 import com.mongodb.client.MongoClient;
-import lombok.val;
-import net.clydo.clytil.reflect.Constructors;
-import net.clydo.mongo.operations.OperationsGroup;
 import net.clydo.mongo.registry.SchematicRegistry;
 import org.jetbrains.annotations.NotNull;
 
-public record MongoHelperImpl(
-        @NotNull SchematicRegistry schematicRegistry
-) implements MongoHelper {
+final class MongoHelperImpl extends SchematicRegistry implements MongoHelper {
 
-    public MongoHelperImpl(
-            @NotNull final MongoClient schematicRegistry
+    MongoHelperImpl(
+            @NotNull final MongoClient client
     ) {
-        this(new SchematicRegistry(schematicRegistry));
-    }
-
-    @Override
-    public <S extends OrmSchematic> void register(
-            @NotNull final Class<S> clazz
-    ) {
-        val constructor = Constructors.of(clazz);
-        val schematic = constructor.newInstance();
-        this.schematicRegistry.register(schematic);
-    }
-
-    @NotNull
-    @Override
-    public <M> OperationsGroup<M> get(
-            @NotNull final Class<M> clazz
-    ) {
-        return this.schematicRegistry.get(clazz);
+        super(client);
     }
 
 }

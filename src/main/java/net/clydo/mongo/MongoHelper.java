@@ -35,6 +35,10 @@ public interface MongoHelper {
         return new MongoHelperImpl(client);
     }
 
+    void register(
+            @NotNull final OrmSchematic schematic
+    );
+
     <S extends OrmSchematic> void register(
             @NotNull final Class<S> clazz
     );

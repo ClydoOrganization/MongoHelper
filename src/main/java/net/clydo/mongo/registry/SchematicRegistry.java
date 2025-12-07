@@ -26,6 +26,7 @@ import com.mongodb.client.MongoDatabase;
 import lombok.Getter;
 import lombok.val;
 import net.clydo.clytil.Validates;
+import net.clydo.clytil.reflect.Constructors;
 import net.clydo.mongo.OrmSchematic;
 import net.clydo.mongo.codec.EnumMetaCodecProvider;
 import net.clydo.mongo.codec.TypeMetaCodecProvider;
@@ -80,6 +81,16 @@ public class SchematicRegistry {
 
         this.buildCache(schematic);
         this.schematics.add(schematic);
+    }
+
+    public <S extends OrmSchematic> void register(
+            @NotNull final Class<S> clazz
+    ) {
+        Validates.require(clazz, "clazz");
+
+        val constructor = Constructors.of(clazz);
+        val schematic = constructor.newInstance();
+        this.register(schematic);
     }
 
     @NotNull
