@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import lombok.val;
 import net.clydo.clytil.Inits;
+import net.clydo.clytil.reflect.Reflects;
 import org.bson.*;
 import org.bson.codecs.BsonTypeClassMap;
 import org.bson.codecs.BsonTypeCodecMap;
@@ -46,11 +47,10 @@ public class CodecsHelper {
     @Getter
     private static final BsonTypeClassMap defaultBsonTypeClassMap = Inits.of(() -> {
         try {
-            val clazz = BsonTypeClassMap.class;
-            val field = clazz.getDeclaredField("DEFAULT_BSON_TYPE_CLASS_MAP");
+            val field = Reflects.getField(BsonTypeClassMap.class, "DEFAULT_BSON_TYPE_CLASS_MAP");
             field.setAccessible(true);
             return (BsonTypeClassMap) field.get(null);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     });
