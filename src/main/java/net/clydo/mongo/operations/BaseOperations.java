@@ -21,6 +21,7 @@
 package net.clydo.mongo.operations;
 
 import com.mongodb.client.MongoCollection;
+import lombok.Getter;
 import lombok.val;
 import net.clydo.mongo.meta.model.ModelMeta;
 import net.clydo.mongo.meta.model.index.IndexMetaMap;
@@ -29,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class BaseOperations<M> {
 
+    @Getter
     protected final MongoCollection<M> collection;
     protected final ModelMeta<M> model;
     protected final IndexMetaMap indices;
