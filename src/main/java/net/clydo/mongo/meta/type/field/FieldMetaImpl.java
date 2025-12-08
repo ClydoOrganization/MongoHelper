@@ -61,7 +61,10 @@ public final class FieldMetaImpl implements FieldMeta {
             @Nullable final Object value
     ) {
         if (!this.isOptional()) {
-            Validates.requireMsg(value, "Null value is not allowed when 'isOptional' is false for '" + this.name + "'");
+            Validates.requireLazy(
+                    value,
+                    () -> "Null value is not allowed when 'isOptional' is false for '" + this.name + "' (owner=" + owner.getClass() + ")"
+            );
         }
 
         this.accessor.set(owner, value);
@@ -74,7 +77,10 @@ public final class FieldMetaImpl implements FieldMeta {
     ) {
         val value = this.accessor.get(owner);
         if (!this.isOptional()) {
-            Validates.requireMsg(value, "Null value is not allowed when 'isOptional' is false for '" + this.name + "'");
+            Validates.requireLazy(
+                    value,
+                    () -> "Null value is not allowed when 'isOptional' is false for '" + this.name + "' (owner=" + owner.getClass() + ")"
+            );
         }
 
         return value;
