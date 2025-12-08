@@ -21,6 +21,7 @@
 package net.clydo.mongo.operations;
 
 import com.mongodb.client.MongoCollection;
+import lombok.Getter;
 import net.clydo.mongo.meta.model.ModelMeta;
 import net.clydo.mongo.operations.count.CountOperationsImpl;
 import net.clydo.mongo.operations.create.CreateOperationsImpl;
@@ -31,6 +32,9 @@ import net.clydo.mongo.operations.upsert.UpsertOperationsImpl;
 import org.jetbrains.annotations.NotNull;
 
 public class OperationsGroup<M> {
+
+    @Getter
+    private final MongoCollection<M> collection;
 
     private final CountOperationsImpl<M> countOperations;
     private final CreateOperationsImpl<M> createOperations;
@@ -43,6 +47,7 @@ public class OperationsGroup<M> {
             @NotNull final MongoCollection<M> collection,
             @NotNull final ModelMeta<M> model
     ) {
+        this.collection = collection;
         this.countOperations = new CountOperationsImpl<>(collection, model);
         this.createOperations = new CreateOperationsImpl<>(collection, model);
         this.deleteOperations = new DeleteOperationsImpl<>(collection, model);
