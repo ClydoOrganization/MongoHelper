@@ -41,7 +41,7 @@ public class TypeMetaBuilder extends MetaBuilder<TypeMeta<?>> {
     @Setter
     protected ConstructorMeta<?> constructorMeta;
     @Setter
-    protected MethodInvoker<Object, Void> onLoad;
+    protected MethodInvoker<Object, Void> afterLoad;
 
     protected Map<String, Method> setters;
     protected Map<String, Method> getters;
@@ -79,7 +79,7 @@ public class TypeMetaBuilder extends MetaBuilder<TypeMeta<?>> {
         this.setters = new HashMap<>();
         this.getters = new HashMap<>();
         this.constructorMeta = null;
-        this.onLoad = null;
+        this.afterLoad = null;
     }
 
     @NotNull
@@ -88,7 +88,7 @@ public class TypeMetaBuilder extends MetaBuilder<TypeMeta<?>> {
         return new TypeMetaImpl(
                 this.fieldMetaMap,
                 this.constructorMeta,
-                this.onLoad
+                this.afterLoad
         );
     }
 

@@ -63,7 +63,7 @@ public class ModelMetaBuilder extends TypeMetaBuilder {
                 this.fieldMetaMap,
                 this.indexMetaMap,
                 this.constructorMeta,
-                this.onLoad
+                this.afterLoad
         );
     }
 

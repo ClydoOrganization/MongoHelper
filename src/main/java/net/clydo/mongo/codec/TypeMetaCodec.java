@@ -90,7 +90,7 @@ public class TypeMetaCodec<T> implements Codec<T> {
             @NotNull final DecoderContext decoderContext
     ) {
         val constructor = this.typeMeta.constructor();
-        val onLoad = this.typeMeta.onLoad();
+        val afterLoad = this.typeMeta.afterLoad();
 
         val requiredFields = constructor.requiredFields();
         if (requiredFields != null && !requiredFields.isEmpty()) {
@@ -111,8 +111,8 @@ public class TypeMetaCodec<T> implements Codec<T> {
             );
 
             val result = constructor.newInstance(values);
-            if (onLoad != null) {
-                onLoad.invoke(result);
+            if (afterLoad != null) {
+                afterLoad.invoke(result);
             }
             return result;
         } else {
@@ -124,8 +124,8 @@ public class TypeMetaCodec<T> implements Codec<T> {
                     (fieldMeta, value) -> fieldMeta.set(result, value)
             );
 
-            if (onLoad != null) {
-                onLoad.invoke(result);
+            if (afterLoad != null) {
+                afterLoad.invoke(result);
             }
             return result;
         }

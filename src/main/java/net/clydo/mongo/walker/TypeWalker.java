@@ -33,7 +33,7 @@ public class TypeWalker extends ClassWalker {
                 new TypeVisitorImpl(builder),
                 new TypeFieldVisitorImpl(builder),
                 new ConstructorVisitorImpl(builder),
-                new OnLoadMethodVisitorImpl(builder),
+                new AfterLoadMethodVisitorImpl(builder),
                 new AccessorMethodVisitorImpl(builder)
         );
     }

@@ -24,7 +24,7 @@ import lombok.val;
 import net.clydo.clytil.Validates;
 import net.clydo.clytil.reflect.Annotations;
 import net.clydo.clytil.reflect.MethodInvokers;
-import net.clydo.mongo.annotations.OrmOnLoad;
+import net.clydo.mongo.annotations.OrmAfterLoad;
 import net.clydo.mongo.util.LoopControl;
 import net.clydo.mongo.visitor.MethodVisitor;
 import net.clydo.mongo.visitor.builder.TypeMetaBuilder;
@@ -33,9 +33,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 
-public class OnLoadMethodVisitorImpl extends BaseVisitor<TypeMetaBuilder> implements MethodVisitor {
+public class AfterLoadMethodVisitorImpl extends BaseVisitor<TypeMetaBuilder> implements MethodVisitor {
 
-    public OnLoadMethodVisitorImpl(
+    public AfterLoadMethodVisitorImpl(
             @NotNull final TypeMetaBuilder builder
     ) {
         super(builder);
@@ -50,13 +50,13 @@ public class OnLoadMethodVisitorImpl extends BaseVisitor<TypeMetaBuilder> implem
         Validates.require(clazz, "clazz");
         Validates.require(method, "method");
 
-        val ormOnLoad = Annotations.get(method, OrmOnLoad.class);
-        if (ormOnLoad != null) {
-            if (this.builder.getOnLoad() != null) {
-                throw new IllegalStateException("Only one method can be annotated with @OrmOnLoad in class " + clazz.getName());
+        val ormAfterLoad = Annotations.get(method, OrmAfterLoad.class);
+        if (ormAfterLoad != null) {
+            if (this.builder.getAfterLoad() != null) {
+                throw new IllegalStateException("Only one method can be annotated with @OrmAfterLoad in class " + clazz.getName());
             }
 
-            this.builder.setOnLoad(
+            this.builder.setAfterLoad(
                     MethodInvokers.of(clazz, method)
             );
         }

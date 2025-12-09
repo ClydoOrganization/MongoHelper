@@ -24,8 +24,8 @@ import net.clydo.mongo.visitor.builder.ModelMetaBuilder;
 import net.clydo.mongo.visitor.impl.model.IndexVisitorImpl;
 import net.clydo.mongo.visitor.impl.model.ModelVisitorImpl;
 import net.clydo.mongo.visitor.impl.type.AccessorMethodVisitorImpl;
+import net.clydo.mongo.visitor.impl.type.AfterLoadMethodVisitorImpl;
 import net.clydo.mongo.visitor.impl.type.ConstructorVisitorImpl;
-import net.clydo.mongo.visitor.impl.type.OnLoadMethodVisitorImpl;
 import net.clydo.mongo.visitor.impl.type.TypeFieldVisitorImpl;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +39,7 @@ public class ModelWalker extends ClassWalker {
                 new IndexVisitorImpl(builder),
                 new TypeFieldVisitorImpl(builder),
                 new ConstructorVisitorImpl(builder),
-                new OnLoadMethodVisitorImpl(builder),
+                new AfterLoadMethodVisitorImpl(builder),
                 new AccessorMethodVisitorImpl(builder)
         );
     }

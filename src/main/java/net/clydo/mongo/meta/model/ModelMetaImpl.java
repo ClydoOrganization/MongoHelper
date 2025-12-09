@@ -31,6 +31,6 @@ public record ModelMetaImpl<T>(
         @NotNull FieldMetaMap fieldMetaMap,
         @NotNull IndexMetaMap indexMetaMap,
         @NotNull ConstructorMeta<T> constructor,
-        @NotNull MethodInvoker<T, Void> onLoad
+        @NotNull MethodInvoker<T, Void> afterLoad
 ) implements ModelMeta<T> {
 }

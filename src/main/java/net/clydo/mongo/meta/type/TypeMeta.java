@@ -32,6 +32,6 @@ public interface TypeMeta<T> {
     ConstructorMeta<T> constructor();
 
     @Nullable
-    MethodInvoker<T, Void> onLoad();
+    MethodInvoker<T, Void> afterLoad();
 
 }

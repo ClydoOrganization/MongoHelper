@@ -28,6 +28,6 @@ import org.jetbrains.annotations.NotNull;
 public record TypeMetaImpl<T>(
         @NotNull FieldMetaMap fieldMetaMap,
         @NotNull ConstructorMeta<T> constructor,
-        @NotNull MethodInvoker<T, Void> onLoad
+        @NotNull MethodInvoker<T, Void> afterLoad
 ) implements TypeMeta<T> {
 }
